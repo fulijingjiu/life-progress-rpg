@@ -17,6 +17,7 @@
 
 - **[视觉设计](./visual-design.md)** — 色彩、字体、图标等视觉规范
 - **[动效设计](./motion-design.md)** — 动画、转场、交互反馈
+- **[组件设计系统](./component-design.md)** — 完整组件库规范
 - **[分享卡片设计](./share-card-design.md)** — 分享卡片模板与规范
 
 ### 文案设计
