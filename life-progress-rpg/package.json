@@ -1,7 +1,7 @@
 {
   "name": "life-progress-rpg",
   "version": "0.1.0",
-  "description": "把人生变成一场 RPG 游戏——爽感驱动打开，价值驱动留存，AI 让每一天都有意义",
+  "description": "本地优先的个人记录产品：用估算进度吸引注意，以具体当日回应和可核对的累积线索创造价值",
   "type": "module",
   "scripts": {
     "dev": "vite",

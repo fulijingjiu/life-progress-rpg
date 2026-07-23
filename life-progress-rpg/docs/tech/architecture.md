@@ -1,302 +1,136 @@
 # 系统架构
 
-> 整体技术架构设计
+> 状态：v0.1 实施架构；后续架构必须通过验证门槛后启用
 
-## 一、架构概述
+## 设计原则
 
-### 1.1 设计原则
+1. 本地优先：记录先保存到 IndexedDB，网络和 AI 不得阻塞核心流程。
+2. 最小权限：浏览器不持有第三方密钥，服务端不默认保存日记正文。
+3. 可退出：用户可关闭进度、AI 和分析，可导出或清空数据。
+4. 渐进演进：MVP 使用最少组件，不为未验证规模预建微服务。
+5. 结构清晰：源码目录、模块职责、状态所有权和依赖方向遵守[代码结构与技术栈边界](./code-structure.md)。
 
-| 原则 | 说明 |
-|------|------|
-| 高可用 | 多节点部署，自动故障转移 |
-| 可扩展 | 水平扩展，支持高并发 |
-| 安全性 | 全站 HTTPS，数据加密 |
-| 可维护 | 模块化设计，清晰边界 |
-| 性能优先 | 缓存优先，减少延迟 |
+## v0.1 架构
 
-### 1.2 整体架构
-
-```
-┌─────────────────────────────────────────────────────┐
-│                      用户层                          │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌───────┐│
-│  │ Web App │  │  微信   │  │  PWA   │  │ iOS   ││
-│  │ (React) │  │  小程序  │  │ 桌面端  │  │ App  ││
-│  └────┬────┘  └────┬────┘  └────┬────┘  └───┬───┘│
-└───────┼────────────┼────────────┼────────────┼──────┘
-        │            │            │            │
-        └────────────┴────────────┴────────────┘
-                          │
-                  ┌───────┴───────┐
-                  │  API Gateway  │
-                  │   (Nginx)     │
-                  └───────┬───────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-   ┌────┴────┐      ┌────┴────┐      ┌────┴────┐
-   │用户服务  │      │记录服务  │      │AI对话服务│
-   │ (Auth)  │      │ (CRUD)  │      │(Stream) │
-   └────┬────┘      └────┬────┘      └────┬────┘
-        │                 │                 │
-        └────────┬────────┴────────┬────────┘
-                 │                 │
-         ┌───────┴───────┐ ┌──────┴──────┐
-         │  PostgreSQL   │ │    Redis     │
-         │  (主数据库)   │ │   (缓存)     │
-         └───────────────┘ └──────────────┘
+```text
+┌─────────────────────────────────────────────┐
+│ React + TypeScript Web/PWA                  │
+│ UI / Zustand / IndexedDB(Dexie) / 导入导出 │
+└───────────────────┬─────────────────────────┘
+                    │ 仅在用户同意并启用 AI 时
+                    ▼
+┌─────────────────────────────────────────────┐
+│ 同源 AI 代理（单一服务/边缘函数）           │
+│ 校验 → 限流 → 脱敏 → 调用供应商 → 输出校验 │
+└───────────────────┬─────────────────────────┘
+                    ▼
+              AI Provider API
 ```
 
----
+v0.1 不需要 API Gateway、Redis、消息队列、PostgreSQL、多节点或微服务。它们只有在账号、云同步或异步报告经过验证后才进入设计。
 
-## 二、核心模块
+## 模块边界
 
-### 2.1 模块职责
-
-| 模块 | 职责 | 技术栈 |
-|------|------|--------|
-| API Gateway | 请求路由、负载均衡、限流 | Nginx |
-| 用户服务 | 注册/登录/档案管理 | Node.js + Express |
-| 记录服务 | 每日记录 CRUD | Node.js + Express |
-| AI 对话服务 | AI 对话、流式输出 | Node.js + Socket.io |
-| 任务调度 | 定时任务、周报推送 | Bull + Redis |
-
-### 2.2 服务通信
-
-```typescript
-// 服务间通信 - 使用 gRPC 或 REST
-interface UserService {
-  getUser(id: string): Promise<User>;
-  validateToken(token: string): Promise<boolean>;
-}
-
-interface RecordService {
-  createRecord(userId: string, data: RecordData): Promise<Record>;
-  getRecords(userId: string, dateRange: DateRange): Promise<Record[]>;
-}
-
-interface AIService {
-  generateInsight(userId: string, record: Record): Promise<Insight>;
-  chat(sessionId: string, message: string, context: Context): Promise<Stream>;
-}
-```
-
----
-
-## 三、数据流设计
-
-### 3.1 用户请求流程
-
-```
-用户操作 → 前端请求 → API Gateway → 业务服务 → 数据库/缓存
-    ↓
-前端渲染 → 用户看到结果
-```
-
-### 3.2 记录提交流程
-
-```
-用户提交记录 → 前端校验 → POST /api/records
-    ↓
-记录服务保存数据 → 触发 AI 分析
-    ↓
-AI 服务生成洞察 → 推送 WebSocket → 前端展示
-    ↓
-生成周报/月报（定时任务）
-```
-
-### 3.3 AI 对话流程
-
-```
-用户发送消息 → 前端 → WebSocket 连接
-    ↓
-后端接收消息 → 组装 Prompt（含用户上下文）
-    ↓
-调用 AI API（OpenAI/Claude）→ 流式响应
-    ↓
-WebSocket 推送 → 前端逐字显示
-    ↓
-对话结束 → 保存到数据库
-```
-
----
-
-## 四、技术选型
-
-### 4.1 前端技术栈
-
-| 技术 | 用途 | 选择理由 |
+| 模块 | 职责 | 禁止事项 |
 |------|------|----------|
-| React 18 | UI 框架 | 生态成熟，组件化 |
-| TypeScript | 类型安全 | 减少错误 |
-| Tailwind CSS | 样式 | 快速开发 |
-| Framer Motion | 动画 | 进度条、徽章动效 |
-| Zustand | 状态管理 | 轻量，适合小游戏 |
-| React Query | 数据获取 | 缓存、自动刷新 |
-| Socket.io Client | 实时通信 | AI 流式输出 |
-| html2canvas | 截图 | 分享卡片生成 |
-| Recharts | 图表 | 数据可视化 |
+| UI | 展示和交互状态 | 不直接调用第三方 AI |
+| Life Engine | 估算进度、设置、显示开关 | 不宣称精确寿命或精确已活天数 |
+| Record Store | IndexedDB CRUD、迁移、导入导出 | 不静默上传 |
+| Content Engine | 本地当日回应、反馈、后续证据计算和可选 AI 请求 | 不让 AI 计算统计或做重大决策 |
+| AI Proxy | 鉴权/设备令牌、限流、脱敏、供应商调用 | 不记录正文和密钥 |
 
-### 4.2 后端技术栈
+## 核心数据流
 
-| 技术 | 用途 | 选择理由 |
-|------|------|----------|
-| Node.js | 运行时 | 轻量、高并发 |
-| Express/Koa | Web 框架 | 简单、灵活 |
-| Socket.io | 实时通信 | AI 流式对话 |
-| Prisma | ORM | 类型安全、迁移方便 |
-| Bull | 任务队列 | 定时任务、周报 |
-| JWT | 认证 | 无状态、可扩展 |
+### 保存记录
 
-### 4.3 数据库
-
-| 数据库 | 用途 | 选择理由 |
-|--------|------|----------|
-| PostgreSQL | 主数据库 | 支持 JSONB，事务强 |
-| Redis | 缓存/会话 | 高性能 |
-| (可选) MongoDB | 日志 | 大量写入场景 |
-
-### 4.4 AI 服务
-
-| 服务 | 用途 | 备选 |
-|------|------|------|
-| OpenAI GPT-4 | AI 对话 | Claude API |
-| (可选) 国产大模型 | 成本优化 | 百度/阿里 |
-
----
-
-## 五、部署架构
-
-### 5.1 开发环境
-
-```
-本地开发：
-- Frontend: localhost:3000
-- Backend: localhost:4000
-- PostgreSQL: localhost:5432
-- Redis: localhost:6379
+```text
+输入 → 前端校验 → IndexedDB 事务保存 → 立即显示成功
+                                      ├─ 本地当日回应
+                                      ├─ 可选 AI 异步整理
+                                      └─ 回应质量反馈（本地）
 ```
 
-### 5.2 生产环境
+AI 失败只更新 `reflectionStatus=failed`，不得回滚已保存记录。
 
-```
-┌─────────────────────────────────────────────────┐
-│                  CDN (静态资源)                    │
-└─────────────────────┬─────────────────────────────┘
-                      │
-┌─────────────────────┴─────────────────────────────┐
-│                 Load Balancer                      │
-│                  (Nginx)                          │
-└──────┬──────────────────────────────┬────────────┘
-       │                              │
-┌──────┴──────┐               ┌────────┴────────┐
-│  Web Server │               │   API Server     │
-│  (Vercel)  │               │   (Railway)     │
-└─────────────┘               └────────┬────────┘
-                                        │
-                        ┌───────────────┼───────────────┐
-                        │               │               │
-                 ┌──────┴──────┐ ┌─────┴─────┐ ┌─────┴─────┐
-                 │ PostgreSQL  │ │   Redis   │ │ AI Service│
-                 │ (Supabase)  │ │  (Upstash)│ │ (OpenAI) │
-                 └─────────────┘ └───────────┘ └───────────┘
+### AI 文字整理
+
+```text
+检查 aiConsent
+  → 只选择本次任务必要字段
+  → POST /api/reflections
+  → 服务端校验、限流和脱敏
+  → AI 供应商
+  → 结构化输出校验
+  → 返回前端并本地保存
 ```
 
-### 5.3 容器化（可选）
+请求不接受前端传入的供应商密钥、模型名、系统提示词或任意用户 ID。
 
-```yaml
-# docker-compose.yml
-version: '3.8'
+## API 约定
 
-services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    
-  backend:
-    build: ./backend
-    ports:
-      - "4000:4000"
-    depends_on:
-      - postgres
-      - redis
-    
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: life_rpg
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    
-  redis:
-    image: redis:7
+```http
+POST /api/reflections
+Content-Type: application/json
+X-Device-Token: <opaque-token>
 ```
 
----
-
-## 六、安全设计
-
-### 6.1 认证授权
-
-```typescript
-// JWT Token 结构
-interface JWTPayload {
-  userId: string;
-  nickname: string;
-  iat: number;
-  exp: number;
-}
-
-// 权限层级
-enum Permission {
-  READ_RECORD = 'read_record',
-  WRITE_RECORD = 'write_record',
-  READ_DATA = 'read_data',
-  MANAGE_ACHIEVEMENT = 'manage_achievement',
+```json
+{
+  "requestId": "uuid",
+  "record": {
+    "mood": 4,
+    "energy": 7,
+    "tags": ["work"],
+    "content": "完成了项目评审"
+  }
 }
 ```
 
-### 6.2 数据安全
-
-| 措施 | 说明 |
-|------|------|
-| HTTPS | 全站加密传输 |
-| 密码加密 | bcrypt + salt |
-| SQL 注入防护 | Prisma ORM |
-| XSS 防护 | React 默认防护 + CSP |
-| CSRF 防护 | SameSite Cookie |
-| 速率限制 | API 限流 |
-| 数据脱敏 | 生日仅存年份 |
-
----
-
-## 七、监控与日志
-
-### 7.1 监控指标
-
-| 类别 | 指标 |
-|------|------|
-| 业务 | DAU、MAU、留存率 |
-| 技术 | 请求量、错误率、响应时间 |
-| AI | API 调用量、成本、延迟 |
-| 基础设施 | CPU、内存、磁盘 |
-
-### 7.2 日志设计
-
-```typescript
-// 统一日志格式
-interface LogEntry {
-  timestamp: string;
-  level: 'info' | 'warn' | 'error';
-  service: string;
-  action: string;
-  userId?: string;
-  duration?: number;
-  metadata?: Record<string, any>;
+```json
+{
+  "requestId": "uuid",
+  "reflection": "今天完成了重要评审，也留意到能量仍有余量。",
+  "source": "ai",
+  "safety": "ok"
 }
 ```
 
----
+要求：
 
-[返回技术目录](./README.md) | [返回项目根目录](../README.md)
+- JSON Schema 校验和正文长度上限。
+- 请求幂等；超时和供应商错误映射为稳定错误码。
+- CORS 只允许产品域名；生产环境启用 HTTPS、安全响应头和速率限制。
+- 供应商和模型由服务端配置，不写死在客户端或文档示例中。
+
+## 安全与隐私
+
+| 控制 | v0.1 要求 |
+|------|------------|
+| 密钥 | 仅服务端环境变量；禁止 `VITE_*_API_KEY` |
+| 同意 | AI 和行为分析分别明示同意，默认关闭 |
+| 日志 | 记录请求 ID、状态、延迟和用量；不记录正文、昵称、出生年份 |
+| 保留 | AI 代理默认不持久化正文；供应商保留策略必须在隐私说明中披露 |
+| 输出 | 长度、结构和安全分类校验；失败回退到规则模板 |
+| 删除 | 本地清空立即生效；未来云端实现需覆盖主库、缓存、备份和供应商数据 |
+
+## 可观测性
+
+仅收集：
+
+- 成功率、错误码、延迟分位数
+- 供应商用量和估算成本
+- 前端未处理异常
+
+不收集日记正文、完整 Prompt、AI 完整回复或可逆身份信息。
+
+## 演进条件
+
+| 阶段 | 触发条件 | 架构变化 |
+|------|----------|----------|
+| v0.1 | 验证当日回应与第二次记录 | 本地优先 + 可选 AI 代理 |
+| v0.2 | 周期证据通过内容研究 | 本地确定性分析；不默认增加后端 |
+| v0.3 | 主动探索通过研究 | 本地证据包和用户选择状态 |
+| 可选同步 | 跨设备需求和隐私方案通过评审 | 单体 API + PostgreSQL |
+| 规模化 | 已验证后台任务使单体容量持续超限 | 再评估队列、缓存或服务拆分 |
+
+[返回技术目录](./README.md) | [返回文档中心](../README.md)

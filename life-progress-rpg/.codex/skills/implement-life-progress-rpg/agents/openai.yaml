@@ -1,0 +1,4 @@
+interface:
+  display_name: "Life Progress RPG Implementer"
+  short_description: "高质量实现与打磨 life-progress-rpg MVP"
+  default_prompt: "使用 $implement-life-progress-rpg 完成下一个 P0 垂直切片，并按质量基线打磨界面、交互和文案。"

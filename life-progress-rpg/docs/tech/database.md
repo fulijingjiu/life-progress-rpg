@@ -1,293 +1,167 @@
-# 数据库设计
+# 数据设计
 
-> 数据模型、索引、查询优化
+> 状态：v0.1 本地数据为实施基线；云端结构是后续参考
 
-## 一、ER 图
+## v0.1：IndexedDB
 
-```
-┌─────────────┐       ┌─────────────┐
-│    users    │       │ achievements│
-├─────────────┤       ├─────────────┤
-│ id (PK)     │───┐   │ id (PK)     │
-│ nickname    │   │   │ user_id (FK)│
-│ birthday    │   │   │ type        │
-│ theme       │   └───│ title       │
-│ created_at  │       │ unlocked_at │
-└─────────────┘       └─────────────┘
-        │                     │
-        │                     │
-        │              ┌──────┴──────┐
-        │              │             │
-┌───────┴───────┐ ┌───┴────┐ ┌─────┴─────┐
-│ life_records  │ │milestones│ │ai_convers│
-├───────────────┤ ├─────────┤ ├──────────┤
-│ id (PK)       │ │ id (PK) │ │ id (PK)  │
-│ user_id (FK)  │ │user_id  │ │ user_id  │
-│ record_date   │ │age_target│ │session_id│
-│ content       │ │ title   │ │ role     │
-│ mood (1-10)   │ │is_unlock│ │ content  │
-│ energy (0-10) │ └─────────┘ │ context  │
-│ category      │             └──────────┘
-│ tags (JSONB)  │
-│ ai_summary    │
-└───────────────┘
-```
-
----
-
-## 二、表结构
-
-### 2.1 用户表 (users)
-
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  nickname VARCHAR(50) NOT NULL,
-  birthday_year INT NOT NULL,  -- 只存年份，保护隐私
-  life_expectancy INT DEFAULT 80,
-  theme VARCHAR(20) DEFAULT 'default',
-  avatar_url TEXT,
-  sound_enabled BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 索引
-CREATE INDEX idx_users_created_at ON users(created_at);
-```
-
-### 2.2 人生记录表 (life_records)
-
-```sql
-CREATE TABLE life_records (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  record_date DATE NOT NULL,
-  content TEXT,
-  mood INT CHECK (mood >= 1 AND mood <= 10),
-  energy INT CHECK (energy >= 0 AND energy <= 10),
-  category VARCHAR(30),
-  tags JSONB DEFAULT '[]',
-  ai_summary TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  
-  -- 唯一约束：每人每天只能有一条记录
-  UNIQUE(user_id, record_date)
-);
-
--- 索引
-CREATE INDEX idx_records_user_date ON life_records(user_id, record_date);
-CREATE INDEX idx_records_date ON life_records(record_date);
-CREATE INDEX idx_records_category ON life_records(category);
-CREATE INDEX idx_records_mood ON life_records(mood);
-```
-
-### 2.3 成就表 (achievements)
-
-```sql
-CREATE TABLE achievements (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  achievement_type VARCHAR(50) NOT NULL,
-  title VARCHAR(100) NOT NULL,
-  description TEXT,
-  unlocked_at TIMESTAMP WITH TIME ZONE,
-  is_new BOOLEAN DEFAULT true,
-  
-  UNIQUE(user_id, achievement_type)
-);
-
-CREATE INDEX idx_achievements_user ON achievements(user_id);
-```
-
-### 2.4 AI 对话表 (ai_conversations)
-
-```sql
-CREATE TABLE ai_conversations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  session_id UUID NOT NULL,
-  role VARCHAR(10) NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
-  content TEXT NOT NULL,
-  context_type VARCHAR(30) DEFAULT 'general',
-  related_record_id UUID REFERENCES life_records(id) ON DELETE SET NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_conversations_session ON ai_conversations(session_id);
-CREATE INDEX idx_conversations_user ON ai_conversations(user_id);
-```
-
-### 2.5 里程碑表 (milestones)
-
-```sql
-CREATE TABLE milestones (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  age_target INT NOT NULL,
-  title VARCHAR(100) NOT NULL,
-  description TEXT,
-  is_unlocked BOOLEAN DEFAULT false,
-  unlocked_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_milestones_user ON milestones(user_id);
-```
-
----
-
-## 三、查询示例
-
-### 3.1 用户基础信息 + 今日记录
-
-```sql
-SELECT 
-  u.id,
-  u.nickname,
-  u.birthday_year,
-  u.theme,
-  DATE_PART('year', AGE(NOW(), make_date(u.birthday_year, 1, 1))) as age,
-  r.mood,
-  r.energy,
-  r.content
-FROM users u
-LEFT JOIN life_records r ON r.user_id = u.id AND r.record_date = CURRENT_DATE
-WHERE u.id = $1;
-```
-
-### 3.2 连续记录天数
-
-```sql
-WITH RECURSIVE streak AS (
-  SELECT 
-    user_id,
-    record_date,
-    1 as streak,
-    record_date as streak_start
-  FROM life_records
-  WHERE record_date = CURRENT_DATE - INTERVAL '1 day'
-  
-  UNION ALL
-  
-  SELECT 
-    r.user_id,
-    r.record_date,
-    s.streak + 1,
-    CASE 
-      WHEN r.record_date = s.record_date - INTERVAL '1 day' 
-      THEN s.streak_start 
-      ELSE r.record_date 
-    END
-  FROM life_records r
-  JOIN streak s ON r.user_id = s.user_id 
-    AND r.record_date = s.record_date - INTERVAL '1 day'
-)
-SELECT MAX(streak) as max_streak
-FROM streak
-WHERE user_id = $1;
-```
-
-### 3.3 周报统计
-
-```sql
-SELECT 
-  DATE_TRUNC('week', record_date) as week,
-  AVG(mood)::DECIMAL(2,1) as avg_mood,
-  AVG(energy)::DECIMAL(2,1) as avg_energy,
-  COUNT(*) as total_records,
-  jsonb_object_agg(category, COUNT(*)) as category_count
-FROM life_records
-WHERE user_id = $1 
-  AND record_date >= CURRENT_DATE - INTERVAL '7 days'
-GROUP BY DATE_TRUNC('week', record_date);
-```
-
-### 3.4 AI 上下文查询
-
-```sql
-SELECT 
-  content,
-  role,
-  created_at
-FROM ai_conversations
-WHERE user_id = $1 
-  AND session_id = $2
-ORDER BY created_at ASC
-LIMIT 50;
-```
-
----
-
-## 四、JSONB 查询
-
-### 4.1 标签查询
-
-```sql
--- 查找包含特定标签的记录
-SELECT * FROM life_records
-WHERE user_id = $1
-  AND $2 = ANY(tags);
-```
-
-### 4.2 多标签查询
-
-```sql
--- 查找同时包含多个标签的记录
-SELECT * FROM life_records
-WHERE user_id = $1
-  AND tags @> '["工作", "学习"]'::jsonb;
-```
-
----
-
-## 五、数据库选择理由
-
-| 数据库 | 用途 | 选择理由 |
-|--------|------|----------|
-| PostgreSQL | 主数据库 | 支持 JSONB（灵活存储标签/配置），事务强，适合游戏化系统的复杂查询 |
-| Redis | 缓存 + 会话 | 高频读取的排行榜、用户在线状态、AI 对话限流 |
-| (可选) MongoDB | 日志/埋点 | 如果记录量极大，可用 MongoDB 存原始行为日志 |
-
----
-
-## 六、性能优化
-
-### 6.1 常用查询缓存
+### 表与索引
 
 ```typescript
-// Redis 缓存策略
-const CACHE_TTL = {
-  user_profile: 60 * 60,      // 1 小时
-  today_record: 60,           // 1 分钟
-  weekly_stats: 5 * 60,      // 5 分钟
-  achievements: 60 * 60,      // 1 小时
-};
+interface UserSettings {
+  id: string;
+  nickname?: string;
+  birthdayYear: number;
+  lifeExpectancy: number;
+  showLifeProgress: boolean;
+  aiConsent: boolean;
+  analyticsConsent: boolean;
+  theme: string;
+  onboardingCompleted: boolean;
+  schemaVersion: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface LifeRecord {
+  id: string;
+  userId: string;
+  localDate: string;
+  mood: 1 | 2 | 3 | 4 | 5;
+  energy: number;
+  content?: string;
+  tags: string[];
+  reflection?: string;
+  reflectionSource: 'rules' | 'ai' | 'none';
+  reflectionStatus: 'not_requested' | 'pending' | 'completed' | 'failed';
+  reflectionFeedback?: 'helpful' | 'not_helpful' | 'inaccurate';
+  createdAt: string;
+  updatedAt: string;
+}
 ```
 
-### 6.2 分页查询
-
-```sql
--- 分页获取记录
-SELECT * FROM life_records
-WHERE user_id = $1
-ORDER BY record_date DESC
-LIMIT $2 OFFSET $3;
-```
-
-### 6.3 连接池
+Dexie 索引建议：
 
 ```typescript
-// Prisma 连接池配置
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL + '?connection_limit=10&pool_timeout=20',
-    },
-  },
+db.version(1).stores({
+  settings: 'id, updatedAt',
+  records: 'id, &[userId+localDate], localDate, updatedAt, *tags'
 });
 ```
 
----
+规则：
 
-[返回技术目录](./README.md) | [返回项目根目录](../README.md)
+- `localDate` 是用户本地时区的 `YYYY-MM-DD`，不能用 UTC 截断代替。
+- 心情统一 1～5；能量为整数 0～10。
+- `[userId+localDate]` 唯一，确保同一天编辑原记录。
+- `reflectionFeedback` 仅评价当前回应；回应内容重新生成或来源变化时必须清空旧反馈。
+- 反馈默认只保存在本地；未取得行为分析同意时不得上传。
+- 导入数据先做版本、类型、范围和数量校验，再使用单事务写入。
+- 每次 schema 升级提供迁移函数和回滚/备份说明。
+
+## 后续云端参考
+
+只有跨设备需求通过验证并完成隐私评审后才启用。
+
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  nickname VARCHAR(50),
+  birthday_year SMALLINT NOT NULL
+    CHECK (birthday_year BETWEEN 1900 AND EXTRACT(YEAR FROM CURRENT_DATE)),
+  life_expectancy SMALLINT NOT NULL DEFAULT 80
+    CHECK (life_expectancy BETWEEN 1 AND 120),
+  show_life_progress BOOLEAN NOT NULL DEFAULT TRUE,
+  ai_consent BOOLEAN NOT NULL DEFAULT FALSE,
+  analytics_consent BOOLEAN NOT NULL DEFAULT FALSE,
+  theme VARCHAR(20) NOT NULL DEFAULT 'default',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE life_records (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  local_date DATE NOT NULL,
+  mood SMALLINT NOT NULL CHECK (mood BETWEEN 1 AND 5),
+  energy SMALLINT NOT NULL CHECK (energy BETWEEN 0 AND 10),
+  content TEXT CHECK (char_length(content) <= 5000),
+  tags JSONB NOT NULL DEFAULT '[]'::jsonb
+    CHECK (jsonb_typeof(tags) = 'array'),
+  reflection TEXT,
+  reflection_source VARCHAR(10) NOT NULL DEFAULT 'none'
+    CHECK (reflection_source IN ('rules', 'ai', 'none')),
+  reflection_status VARCHAR(20) NOT NULL DEFAULT 'not_requested'
+    CHECK (reflection_status IN ('not_requested', 'pending', 'completed', 'failed')),
+  reflection_feedback VARCHAR(20)
+    CHECK (reflection_feedback IN ('helpful', 'not_helpful', 'inaccurate')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, local_date)
+);
+
+CREATE INDEX idx_records_user_date
+  ON life_records(user_id, local_date DESC);
+CREATE INDEX idx_records_tags
+  ON life_records USING GIN(tags);
+```
+
+## 正确查询示例
+
+### 最近记录：游标分页
+
+```sql
+SELECT *
+FROM life_records
+WHERE user_id = $1
+  AND ($2::date IS NULL OR local_date < $2)
+ORDER BY local_date DESC
+LIMIT $3;
+```
+
+### 单标签
+
+```sql
+SELECT *
+FROM life_records
+WHERE user_id = $1
+  AND tags ? $2;
+```
+
+### 周统计
+
+```sql
+SELECT
+  AVG(mood)::numeric(3,2) AS avg_mood,
+  AVG(energy)::numeric(4,2) AS avg_energy,
+  COUNT(*) AS record_count
+FROM life_records
+WHERE user_id = $1
+  AND local_date >= $2
+  AND local_date < $3;
+```
+
+分类/标签计数应先展开再聚合，不能嵌套聚合：
+
+```sql
+SELECT tag, COUNT(*) AS uses
+FROM life_records r
+CROSS JOIN LATERAL jsonb_array_elements_text(r.tags) AS tag
+WHERE r.user_id = $1
+  AND r.local_date >= $2
+  AND r.local_date < $3
+GROUP BY tag
+ORDER BY uses DESC;
+```
+
+## 数据生命周期
+
+| 数据 | v0.1 | 后续云端要求 |
+|------|------|--------------|
+| 用户设置/记录 | 仅本地，直到用户导出或清空 | 用户可导出、删除；定义备份删除期限 |
+| AI 请求正文 | 代理不持久化 | 如需保存必须单独同意并说明期限 |
+| 技术日志 | 不含正文和直接身份 | 设置最短必要保留期和访问审计 |
+| 分析事件 | 默认关闭 | 明示同意、匿名化、可撤回 |
+
+“HTTPS”不等于存储加密，“只存出生年份”也不等于完成合规。上线云端前必须补充数据清单、处理目的、供应商、保留期、用户权利和安全事件流程。
+
+[返回技术目录](./README.md) | [返回文档中心](../README.md)

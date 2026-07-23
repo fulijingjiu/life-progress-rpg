@@ -1,394 +1,182 @@
-# 游戏化设计
+# 轻游戏化实验规范
 
-> 核心数值、游戏机制、成就系统
+> 状态：后续实验，不属于 v0.1
+> 前置条件：当日回应已经证明有用，且游戏化不会损害记录真实性或增加焦虑
 
-## 一、核心数值体系
+## 1. 角色
 
-### 1.1 基础数值
+游戏化只负责：
 
-| 数值 | 计算方式 | 用途 |
-|------|----------|------|
-| 人生进度 | 已活天数 / 预期总天数 × 100% | 主进度条 |
-| 章节进度 | 当前年龄在章节内的位置 | 章节进度条 |
-| 等级 (Lv) | = 年龄 | 角色等级 |
-| 经验值 (XP) | 每日记录 +1XP | 升级经验 |
-| 天数 | 从出生到今天的总天数 | 震撼数字 |
+- 让时间和累积过程更容易感知。
+- 为私人回顾提供轻微仪式感。
+- 帮用户看见“我留下了哪些生活片段”。
 
-### 1.2 人生章节
+游戏化不负责：
 
-| 章节 | 年龄范围 | 主题色 | 描述 |
-|------|----------|--------|------|
-| 🌱 萌芽 | 0-6 | 绿色 | 生命的开始 |
-| 📚 求学 | 7-22 | 蓝色 | 学习与成长 |
-| 🔍 探索 | 23-30 | 紫色 | 寻找方向 |
-| 🌿 扎根 | 31-45 | 橙色 | 建立根基 |
-| 🌸 绽放 | 46-60 | 粉色 | 影响力爆发 |
-| 🍂 沉淀 | 61-75 | 棕色 | 智慧传承 |
-| 🌅 归途 | 76+ | 金色 | 回首与珍惜 |
+- 用损失和惩罚逼迫用户回来。
+- 评价人生是否成功。
+- 把出生年龄映射为固定人生任务。
+- 用等级、装备或徽章替代内容价值。
+- 把用户与他人比较。
 
-### 1.3 章节切换机制
+内容价值仍以[内容价值与个人分析策略](../design/content-strategy.md)为准。
 
-```typescript
-interface Chapter {
-  id: number;
-  name: string;
-  emoji: string;
-  ageStart: number;
-  ageEnd: number;
-  description: string;
-  theme: string;
-  objectives: ChapterObjective[];
-}
+## 2. 永久约束
 
-interface ChapterObjective {
-  type: 'influence' | 'relationship' | 'skill';
-  target: number;
-  description: string;
-}
+- 不使用生命值下降、角色受伤、断签或降级。
+- 不公开排名，不显示“超越 X% 用户”。
+- 不按年龄自动划分求学、成家、事业、退休等人生章节。
+- 不使用寿命进度计算等级、经验或奖励。
+- 错过记录不扣除任何已获得内容。
+- 不出售“恢复连续天数”等损失规避能力。
+- 游戏化关闭后，记录、回应、历史和导出保持完整。
+- Reduce Motion 用户获得等价的静态反馈。
 
-const CHAPTERS: Chapter[] = [
-  {
-    id: 1,
-    name: '萌芽',
-    emoji: '🌱',
-    ageStart: 0,
-    ageEnd: 6,
-    description: '生命的开始，每一天都是新技能',
-    theme: '#10B981',
-    objectives: [],
-  },
-  // ...
-];
-```
+## 3. 实验顺序
 
----
+每次只验证一种机制，不能同时上线 XP、徽章、角色和连续统计后再猜测原因。
 
-## 二、经验值系统
+### 实验 A：记录完成反馈
 
-### 2.1 XP 来源
+**形式**
 
-| 行为 | XP | 条件 |
-|------|-----|------|
-| 每日记录 | +1 XP | 每天首次记录 |
-| 连续记录 | +2 XP | 连续3天以上 |
-| AI 对话 | +0.5 XP | 每轮对话 |
-| 分享卡片 | +3 XP | 实际分享 |
-| 解锁成就 | +5 XP | 每个成就 |
-| 章节切换 | +20 XP | 进入新章节 |
+- 保存成功后出现 120～220ms 的轻微状态变化。
+- 今日标记由“未记录”变为“已记录”。
+- 不弹出遮挡内容的庆祝层。
 
-### 2.2 升级机制
+**假设**
 
-```typescript
-// 升级所需 XP = 等级 × 10
-function getXPForLevel(level: number): number {
-  return level * 10;
-}
+清晰完成感可以降低不确定性，而不会转移对回应内容的注意。
 
-// 检查是否升级
-function checkLevelUp(currentXP: number, currentLevel: number): {
-  newXP: number;
-  newLevel: number;
-  leveledUp: boolean;
-} {
-  const xpNeeded = getXPForLevel(currentLevel);
-  
-  if (currentXP >= xpNeeded) {
-    return {
-      newXP: currentXP - xpNeeded,
-      newLevel: currentLevel + 1,
-      leveledUp: true,
-    };
-  }
-  
-  return {
-    newXP: currentXP,
-    newLevel: currentLevel,
-    leveledUp: false,
-  };
-}
-```
+**停止信号**
 
-### 2.3 连续记录加成
+- 用户没有看见当日回应。
+- 动效延迟下一步或引发不适。
+- 用户误解为连续签到任务。
 
-```typescript
-const STREAK_BONUS: Record<number, number> = {
-  3: 2,    // 连续3天 +2 XP
-  7: 5,    // 连续7天 +5 XP
-  14: 10,  // 连续14天 +10 XP
-  30: 20,  // 连续30天 +20 XP
-  100: 50, // 连续100天 +50 XP
-  365: 100,// 连续365天 +100 XP
-};
+### 实验 B：私人片段集合
 
-function getStreakBonus(streakDays: number): number {
-  const bonuses = Object.entries(STREAK_BONUS)
-    .map(([days, bonus]) => ({ days: Number(days), bonus }))
-    .sort((a, b) => b.days - a.days);
-  
-  return bonuses.find(b => streakDays >= b.days)?.bonus ?? 1;
-}
-```
+**形式**
 
----
+- 用月历或时间轴表示已经留下记录的日期。
+- 日期只表示“有记录”，不表示“成功”。
+- 缺失日期保持中性，不使用破损、灰败或警告视觉。
 
-## 三、成就系统
+**假设**
 
-### 3.1 成就分类
+看到个人档案逐渐形成，可以增加回看意愿。
 
-| 分类 | 说明 | 示例 |
-|------|------|------|
-| 🌱 入门 | 首次行为 | 萌芽者、首次记录 |
-| 🔥 坚持 | 连续记录 | 连续7天、连续30天 |
-| 📊 数据 | 达到数据目标 | 记录满100天、心情累计 |
-| 💎 洞察 | AI 互动 | 首次 AI 对话、查看周报 |
-| 🚀 社交 | 分享传播 | 分享达人、被点赞 |
-| 🏆 章节 | 人生里程碑 | 进入新章节、章节通关 |
-| 🎯 目标 | 自定义目标 | 完成自定义目标 |
+**停止信号**
 
-### 3.2 成就列表
+- 用户为了填满日历而提交不真实内容。
+- 缺失日期造成显著压力。
+
+### 实验 C：非连续里程碑
+
+**形式**
+
+- 按累计有效记录数显示私人里程碑，例如第 5、20、50 条。
+- 里程碑不会过期，也不要求连续。
+- 文案描述事实：“你已经留下 20 个生活片段”。
+
+**假设**
+
+累计里程碑比连续天数更包容，仍能提供成长感。
+
+**停止信号**
+
+- 用户只关注数量，不再认真记录。
+- 里程碑压过周期内容的实际价值。
+
+### 实验 D：用户自定义章节
+
+**形式**
+
+- 用户自行命名时间段，例如“搬家之后”“学习新技能的三个月”。
+- 章节起止日期由用户决定，可以编辑或删除。
+- 系统不根据年龄、婚姻、职业和地域自动命名。
+
+**假设**
+
+用户定义的章节比固定人生阶段更有个人意义。
+
+**停止信号**
+
+- 创建成本高于回顾价值。
+- 用户误认为章节代表系统评价。
+
+## 4. 不建议的机制
+
+| 机制 | 问题 |
+|------|------|
+| 每日 XP | 容易把真实记录变成刷分 |
+| 断签惩罚 | 使用损失厌恶，增加羞耻和焦虑 |
+| 角色受伤 | 把未记录解释为失败 |
+| 固定年龄章节 | 强化单一人生路径 |
+| 随机宝箱 | 用不确定奖励替代内在动机 |
+| 排行榜 | 私密人生数据不应跨用户竞争 |
+| AI 互动成就 | 诱导更多发送敏感内容 |
+| 付费恢复 | 利用用户已投入记录制造压力 |
+
+若未来研究提出这些机制，必须重新进行伦理、隐私和焦虑评审，不能从本文件推断已获批准。
+
+## 5. 实验设计
+
+每个实验记录：
 
 ```typescript
-interface Achievement {
+interface GamificationExperiment {
   id: string;
-  category: string;
-  title: string;
-  emoji: string;
-  description: string;
-  condition: AchievementCondition;
-  xp_reward: number;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-}
-
-const ACHIEVEMENTS: Achievement[] = [
-  // 入门类
-  {
-    id: 'first_record',
-    category: '入门',
-    title: '萌芽者',
-    emoji: '🌱',
-    description: '完成首次记录',
-    condition: { type: 'record_count', value: 1 },
-    xp_reward: 5,
-    rarity: 'common',
-  },
-  
-  // 坚持类
-  {
-    id: 'streak_7',
-    category: '坚持',
-    title: '连续7天',
-    emoji: '🔥',
-    description: '连续记录7天',
-    condition: { type: 'streak', value: 7 },
-    xp_reward: 10,
-    rarity: 'rare',
-  },
-  {
-    id: 'streak_30',
-    category: '坚持',
-    title: '连续30天',
-    emoji: '💎',
-    description: '连续记录30天',
-    condition: { type: 'streak', value: 30 },
-    xp_reward: 30,
-    rarity: 'epic',
-  },
-  {
-    id: 'streak_100',
-    category: '坚持',
-    title: '百日修行',
-    emoji: '🏆',
-    description: '连续记录100天',
-    condition: { type: 'streak', value: 100 },
-    xp_reward: 100,
-    rarity: 'legendary',
-  },
-  
-  // AI 类
-  {
-    id: 'first_ai',
-    category: '洞察',
-    title: '洞察者',
-    emoji: '💡',
-    description: '首次使用 AI 分析',
-    condition: { type: 'ai_conversation_count', value: 1 },
-    xp_reward: 5,
-    rarity: 'common',
-  },
-  {
-    id: 'ai_master',
-    category: '洞察',
-    title: '人生导师',
-    emoji: '🧙',
-    description: '与 AI 对话 50 次',
-    condition: { type: 'ai_conversation_count', value: 50 },
-    xp_reward: 25,
-    rarity: 'epic',
-  },
-  
-  // 社交类
-  {
-    id: 'first_share',
-    category: '社交',
-    title: '分享达人',
-    emoji: '🚀',
-    description: '首次分享卡片',
-    condition: { type: 'share_count', value: 1 },
-    xp_reward: 5,
-    rarity: 'common',
-  },
-  {
-    id: 'viral',
-    category: '社交',
-    title: '病毒传播',
-    emoji: '🌊',
-    description: '分享卡片被点赞 100 次',
-    condition: { type: 'share_likes', value: 100 },
-    xp_reward: 50,
-    rarity: 'legendary',
-  },
-];
-```
-
-### 3.3 成就解锁检测
-
-```typescript
-async function checkAchievements(userId: string) {
-  const user = await getUser(userId);
-  const records = await getRecords(userId, { limit: 365 });
-  const achievements = await getAchievements(userId);
-  
-  const unlockedIds = new Set(achievements.map(a => a.type));
-  
-  for (const achievement of ACHIEVEMENTS) {
-    if (unlockedIds.has(achievement.id)) continue;
-    
-    if (checkCondition(achievement.condition, user, records)) {
-      await unlockAchievement(userId, achievement);
-      await notifyAchievement(achievement);
-    }
-  }
-}
-
-function checkCondition(
-  condition: AchievementCondition,
-  user: User,
-  records: Record[]
-): boolean {
-  switch (condition.type) {
-    case 'record_count':
-      return records.length >= condition.value;
-    case 'streak':
-      return calculateStreak(records) >= condition.value;
-    case 'ai_conversation_count':
-      return user.ai_conversations >= condition.value;
-    case 'share_count':
-      return user.share_count >= condition.value;
-    // ...
-  }
+  hypothesis: string;
+  primaryMetric: string;
+  guardrailMetrics: string[];
+  audience: string;
+  startAt: string;
+  endAt: string;
+  stopConditions: string[];
 }
 ```
 
----
+至少包含：
 
-## 四、排行榜系统
+- 一个价值指标，例如周期回顾查看率。
+- 一个真实性指标，例如用户是否为了数量提交空记录。
+- 一个压力指标，例如焦虑或羞辱反馈。
+- 一个可用性指标，例如当日回应是否被看见。
 
-### 4.1 排行榜类型
+不能只用打开次数、连续天数或停留时长证明成功。
 
-| 类型 | 排序方式 | 可见性 |
-|------|----------|--------|
-| 同龄人进度 | 人生进度百分比 | 公开 |
-| 连续记录 | 连续天数 | 公开 |
-| 影响力 | 分享次数 + 互动 | 公开 |
-| 本周活跃 | 本周记录数 | 公开 |
+## 6. 文案
 
-### 4.2 排行榜查询
+推荐：
 
-```typescript
-// 获取排行榜
-async function getLeaderboard(
-  type: LeaderboardType,
-  limit: number = 10
-): Promise<LeaderboardEntry[]> {
-  switch (type) {
-    case 'progress':
-      return prisma.$queryRaw`
-        SELECT u.id, u.nickname, u.avatar_url,
-          ROUND(
-            (EXTRACT(YEAR FROM AGE(NOW(), make_date(u.birthday_year, 1, 1))) * 365 + 
-             EXTRACT(DOY FROM AGE(NOW(), make_date(u.birthday_year, 1, 1))))::numeric / 
-            (u.life_expectancy * 365) * 100, 2
-          ) as progress
-        FROM users u
-        ORDER BY progress DESC
-        LIMIT ${limit}
-      `;
-      
-    case 'streak':
-      return getStreakLeaderboard(limit);
-      
-    // ...
-  }
-}
+```text
+今天的记录已保存
+这个月留下了 8 个生活片段
+这是你的第 20 条记录
 ```
 
----
+避免：
 
-## 五、游戏化反馈
-
-### 5.1 即时反馈
-
-```typescript
-interface FeedbackConfig {
-  type: 'xp' | 'streak' | 'achievement' | 'level_up';
-  animation: 'pop' | 'bounce' | 'glow';
-  sound?: string;
-  duration: number;
-}
-
-const FEEDBACK_CONFIG: Record<string, FeedbackConfig> = {
-  xp_gain: {
-    type: 'xp',
-    animation: 'pop',
-    duration: 1000,
-  },
-  streak_update: {
-    type: 'streak',
-    animation: 'bounce',
-    sound: 'fire_whoosh',
-    duration: 1500,
-  },
-  achievement_unlock: {
-    type: 'achievement',
-    animation: 'glow',
-    sound: 'victory',
-    duration: 3000,
-  },
-};
+```text
+坚持就是胜利
+别让连续记录断掉
+你击败了 90% 的用户
+距离升级只差一天
+你的人生进入了新等级
 ```
 
-### 5.2 激励文案
+具体文案遵守[文案与内容表达指南](../design/copywriting.md)。
 
-```typescript
-const MOTIVATION_TEXTS = {
-  xp_gain: [
-    '+1 经验值，继续加油！',
-    '又进步了一点 ✨',
-    '今天的你，比昨天更好',
-  ],
-  streak_update: [
-    '🔥 连续记录！坚持就是力量',
-    '你已经坚持 {days} 天了！',
-    '每一步都算数，继续！',
-  ],
-  achievement_unlock: [
-    '🏆 新成就解锁！',
-    '太棒了！你做到了！',
-    '这是你应得的荣耀',
-  ],
-};
-```
+## 7. 进入开发的门槛
 
----
+游戏化实验只有同时满足以下条件才能进入实施：
 
-[返回技术目录](./README.md) | [返回项目根目录](../README.md)
+- v0.1 当日回应有用率和第二次记录率达到判断线。
+- 目标用户研究表明缺少完成感或累积感是主要问题。
+- 实验能独立开启和关闭。
+- 有明确停止条件和恢复方案。
+- 不改变原始记录、内容分析和数据导出的正确性。
+- 不增加未经必要性评审的个人数据。
+
+[返回技术目录](./README.md) | [返回文档中心](../README.md)

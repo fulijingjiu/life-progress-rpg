@@ -660,4 +660,4 @@ function initTheme() {
 
 ---
 
-[返回设计目录](./README.md) | [返回项目根目录](../README.md)
+[返回设计目录](./README.md) | [返回文档中心](../README.md)

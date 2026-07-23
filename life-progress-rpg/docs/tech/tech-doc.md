@@ -3,6 +3,8 @@
 > 版本：v1.0 | 日期：2026-07-23
 > 定位：将人生数据游戏化，每一点记录可接入 AI 分析对话
 
+> ⚠️ 归档说明：这是早期方案，不作为实施依据。当前架构、数据和 AI 约束分别见 [architecture.md](./architecture.md)、[database.md](./database.md) 和 [ai-design.md](./ai-design.md)。
+
 ---
 
 ## 一、技术选型
@@ -84,7 +86,7 @@
 |------|------|------|
 | id | UUID | 主键 |
 | nickname | VARCHAR(50) | 昵称 |
-| birthday | DATE | 生日 |
+| birthday_year | SMALLINT | 出生年份（仅用于估算） |
 | life_expectancy | INT | 预期寿命（默认80） |
 | theme | VARCHAR(20) | 主题色 |
 | avatar_url | TEXT | 头像地址 |
@@ -99,8 +101,8 @@
 | user_id | UUID | 外键 → users |
 | record_date | DATE | 记录日期 |
 | content | TEXT | 记录内容 |
-| mood | INT | 心情评分 1-10 |
-| energy | INT | 能量值 1-10 |
+| mood | INT | 心情评分 1-5 |
+| energy | INT | 能量值 0-10 |
 | category | VARCHAR(30) | 分类：工作/学习/健康/关系/娱乐 |
 | tags | JSONB | 标签数组 |
 | ai_summary | TEXT | AI 生成的当日总结 |

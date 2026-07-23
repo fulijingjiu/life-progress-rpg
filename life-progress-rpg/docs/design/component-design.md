@@ -1,6 +1,8 @@
 # 组件设计系统
 
-> 完整组件库规范 | 版本：v2.0 | 日期：2026-07-23
+> 状态：完整产品愿景组件库，不是 v0.1 实施清单
+> v0.1 只实现 [MVP 规划](../planning/milestone-v1.md) 所需组件；内容组件遵守[内容价值与个人分析策略](./content-strategy.md)
+> 版本：v2.0 | 最近校准：2026-07-24
 
 ---
 
@@ -107,13 +109,13 @@
   onChange={setName}
 />
 
-// 带错误提示
+// 出生年份（只用于估算）
 <Input
-  label="生日"
-  type="date"
-  value={birthday}
-  error="请选择有效的日期"
-  onChange={setBirthday}
+  label="出生年份"
+  type="number"
+  value={birthdayYear}
+  error="请输入有效年份"
+  onChange={setBirthdayYear}
 />
 
 // 多行文本
@@ -1044,4 +1046,4 @@ ProfilePage
 
 ---
 
-[返回设计目录](./README.md) | [返回项目根目录](../README.md)
+[返回设计目录](./README.md) | [返回文档中心](../README.md)

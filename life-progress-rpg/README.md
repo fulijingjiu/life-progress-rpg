@@ -1,120 +1,91 @@
 # 人生进度条 RPG
 
-> 把人生变成一场 RPG 游戏——爽感驱动打开，价值驱动留存，AI 让每一天都有意义。
+一个本地优先的个人记录 MVP：用可关闭的估算进度吸引第一次注意，让低负担记录立即得到具体回应，并把累积记录逐渐变成可核对的个人线索。
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/Version-0.1.0-orange.svg)]()
+> 当前版本：v0.1 实施阶段
+> 唯一实施基线：[MVP 规划](./docs/planning/milestone-v1.md)
 
-## 核心特性
+## v0.1 范围
 
-- **人生进度可视化** — 用 RPG 游戏的视角看待人生，量化每一天的价值
-- **AI 人生向导** — 基于你的数据，AI 给出个性化的洞察和建议
-- **游戏化成就系统** — 记录即经验值，解锁徽章，见证成长
-- **精美分享卡片** — 一键生成，让朋友圈见证你的成长轨迹
+- 可关闭、明确标注为“估算”的人生进度
+- 心情 1～5、能量 0～10、标签和可选备注
+- IndexedDB 本地持久化
+- 历史记录的查看、编辑和删除
+- JSON 导入、导出和清空
+- 默认本地规则生成有事实依据的当日回应
+- 回应的“有帮助 / 没帮助 / 事实不准确”反馈
+- 经用户同意、通过服务端代理的可选 AI 文字整理
+- 离线、错误回退、隐私控制和基础无障碍
 
-## 快速开始
+v0.1 不包含账号、云同步、公开分享、排行榜、正式成就/XP、报告、深度 AI 对话或人生规划。
+
+## 技术栈
+
+- React 18 + TypeScript
+- Vite
+- Zustand
+- Dexie / IndexedDB
+- Tailwind CSS
+- Framer Motion
+- Vitest
+
+## 开发
+
+要求 Node.js 18 或更高版本。
 
 ```bash
-# 克隆项目
-git clone https://github.com/yourusername/life-progress-rpg.git
-
-# 安装依赖
 npm install
-
-# 启动开发服务器
 npm run dev
 ```
 
-详细说明请查看 [快速开始指南](./guide/getting-started.md)。
+常用验证：
 
-## 项目结构
-
-```
-life-progress-rpg/
-├── docs/                   # 项目文档
-│   ├── guide/            # 用户指南
-│   ├── design/           # 设计文档
-│   ├── tech/             # 技术文档
-│   ├── planning/         # 规划文档
-│   └── research/         # 研究文档
-├── src/                   # 源代码
-└── tests/                 # 测试文件
+```bash
+npm run lint
+npm run test -- --run
+npm run build
+python .codex/skills/implement-life-progress-rpg/scripts/validate_project.py
+git diff --check
 ```
 
-## 文档导航
+默认本地规则模式不需要 AI Key。真实 AI 密钥只能配置在服务端，禁止使用 `VITE_*_API_KEY`。
 
-### 新手上路
+## AI 实现入口
 
-- [快速开始](./guide/getting-started.md) — 5 分钟快速上手
-- [用户手册](./guide/user-guide.md) — 完整功能介绍
-- [常见问题](./guide/faq.md) — FAQ
+项目提供仓库级 Skill：
 
-### 设计文档
-
-- [产品概念](./design/concept.md) — 产品定位与愿景
-- [UX 设计规范](./design/ux-spec-v2.md) — 最新交互设计
-- [视觉设计](./design/visual-design.md) — 视觉规范
-- [动效设计](./design/motion-design.md) — 动效规范
-- [文案设计](./design/copywriting.md) — 文案风格指南
-
-### 技术文档
-
-- [系统架构](./tech/architecture.md) — 技术架构设计
-- [数据库设计](./tech/database.md) — 数据模型
-- [前端技术](./tech/frontend.md) — 前端技术栈
-- [AI 接入设计](./tech/ai-design.md) — AI 对话系统
-- [游戏化设计](./tech/gamification.md) — 游戏机制
-
-### 规划文档
-
-- [产品路线图](./planning/roadmap.md) — 开发计划
-- [版本里程碑](./planning/milestone-v1.md) — MVP 规划
-- [变更日志](./planning/changelog.md) — 版本更新
-
-### 研究文档
-
-- [竞品分析](./research/competitive-analysis.md) — 市场竞争分析
-- [用户研究](./research/user-research.md) — 用户画像与需求
-
-## 核心概念
-
-### 爽感 + 价值 双轮驱动
-
-```
-        ┌─────────────┐
-        │   用户打开   │
-        └──────┬──────┘
-               │
-        ┌──────┴──────┐
-        │             │
-   ┌────┴────┐   ┌────┴────┐
-   │  爽感层  │   │  价值层  │
-   │ (情绪)   │   │ (理性)   │
-   └────┬────┘   └────┬────┘
-        │             │
-        │ 爽感让你打开 │
-        │ 价值让你留下 │
-        └─────────────┘
+```text
+$implement-life-progress-rpg
 ```
 
-### AI 价值层级
+推荐提示：
 
-| 层级 | 能力 | 示例 |
-|------|------|------|
-| L1 | 记录总结 | "今天能量值 7，心情不错" |
-| L2 | 趋势分析 | "本周心情比上周提升 0.5" |
-| L3 | 关联发现 | "能量值低的日子 87% 与加班相关" |
-| L4 | 预测建议 | "下周三如果完成运动，能量值预计提升 23%" |
-| L5 | 人生规划 | "基于你的数据，建议 35 岁前完成..." |
+```text
+使用 $implement-life-progress-rpg 按项目规则实现并验证 v0.1 的下一个 P0 垂直切片。
+```
 
-## 贡献指南
+完整自主执行流程见 [AI 实现执行 Loop](./docs/planning/ai-implementation-loop.md)。
 
-欢迎提交 Issue 和 Pull Request！
+## 文档
+
+- [文档中心](./docs/README.md)
+- [项目概念](./docs/design/concept.md)
+- [MVP 规划](./docs/planning/milestone-v1.md)
+- [AI 实现执行 Loop](./docs/planning/ai-implementation-loop.md)
+- [UX 规范](./docs/design/ux-spec-v2.md)
+- [界面、交互与内容质量基线](./docs/design/quality-bar.md)
+- [内容价值与个人分析策略](./docs/design/content-strategy.md)
+- [系统架构](./docs/tech/architecture.md)
+- [代码结构与技术栈边界](./docs/tech/code-structure.md)
+- [数据设计](./docs/tech/database.md)
+- [AI 接入与安全](./docs/tech/ai-design.md)
+- [开发快速开始](./docs/guide/getting-started.md)
+- [常见问题](./docs/guide/faq.md)
+
+## 项目规则
+
+所有贡献者和编码 AI 必须遵守根目录 [AGENTS.md](./AGENTS.md)。发生冲突时，以 MVP 规划和技术安全文档为准。
 
 ## 许可证
 
 [MIT License](./LICENSE)
-
----
-
-*让每一秒都值得被记录。*
