@@ -32,8 +32,8 @@
     <td width="50%" align="center"><strong>历史记录</strong></td>
   </tr>
   <tr>
-    <td><img src="./life-progress-rpg/artifacts/quality-audit/01-home-1440x900.png" alt="人生进度条 RPG 今日首页" /></td>
-    <td><img src="./life-progress-rpg/artifacts/quality-audit/03-history-1440x900.png" alt="人生进度条 RPG 历史记录" /></td>
+    <td><img src="./life-progress-rpg/docs/验收证据/界面截图/01-home-1440x900.png" alt="人生进度条 RPG 今日首页" /></td>
+    <td><img src="./life-progress-rpg/docs/验收证据/界面截图/03-history-1440x900.png" alt="人生进度条 RPG 历史记录" /></td>
   </tr>
 </table>
 
@@ -49,9 +49,9 @@
     <td width="33%" align="center"><strong>数据管理</strong></td>
   </tr>
   <tr>
-    <td><img src="./life-progress-rpg/artifacts/quality-audit/02-record-saved-390x844.png" alt="每日记录页面" /></td>
-    <td><img src="./life-progress-rpg/artifacts/quality-audit/04-settings-390x844.png" alt="设置页面" /></td>
-    <td><img src="./life-progress-rpg/artifacts/quality-audit/05-data-management-390x844.png" alt="数据管理页面" /></td>
+    <td><img src="./life-progress-rpg/docs/验收证据/界面截图/02-record-saved-390x844.png" alt="每日记录页面" /></td>
+    <td><img src="./life-progress-rpg/docs/验收证据/界面截图/04-settings-390x844.png" alt="设置页面" /></td>
+    <td><img src="./life-progress-rpg/docs/验收证据/界面截图/05-data-management-390x844.png" alt="数据管理页面" /></td>
   </tr>
 </table>
 
@@ -135,24 +135,24 @@ git diff --check
 | 文档 | 内容 |
 | --- | --- |
 | [文档中心](./life-progress-rpg/docs/README.md) | 全部设计、规划、研究和技术资料入口 |
-| [MVP 规划](./life-progress-rpg/docs/planning/milestone-v1.md) | v0.1 范围、验收标准与风险 |
-| [实施状态](./life-progress-rpg/docs/planning/implementation-status.md) | 当前完成项、阻塞项和下一步 |
-| [系统架构](./life-progress-rpg/docs/tech/architecture.md) | 模块边界、数据流和演进条件 |
-| [数据设计](./life-progress-rpg/docs/tech/database.md) | IndexedDB 模型、索引与迁移原则 |
-| [AI 安全设计](./life-progress-rpg/docs/tech/ai-design.md) | 同意、代理、输出约束与失败回退 |
-| [UX 规范](./life-progress-rpg/docs/design/ux-spec-v2.md) | 页面流程与交互规范 |
-| [质量基线](./life-progress-rpg/docs/design/quality-bar.md) | 视觉、内容、无障碍和响应式要求 |
+| [MVP 规划](./life-progress-rpg/docs/项目规划/milestone-v1.md) | v0.1 范围、验收标准与风险 |
+| [实施状态](./life-progress-rpg/docs/项目规划/implementation-status.md) | 当前完成项、阻塞项和下一步 |
+| [系统架构](./life-progress-rpg/docs/技术设计/architecture.md) | 模块边界、数据流和演进条件 |
+| [数据设计](./life-progress-rpg/docs/技术设计/database.md) | IndexedDB 模型、索引与迁移原则 |
+| [AI 安全设计](./life-progress-rpg/docs/技术设计/ai-design.md) | 同意、代理、输出约束与失败回退 |
+| [UX 规范](./life-progress-rpg/docs/产品设计/ux-spec-v2.md) | 页面流程与交互规范 |
+| [质量基线](./life-progress-rpg/docs/产品设计/quality-bar.md) | 视觉、内容、无障碍和响应式要求 |
 
 ## 开发计划
 
 当前优先完成：
 
-- 阶段 H 人工视觉与交互验收
+- 阶段 H 自动化视觉、交互与内容验收
 - 离线、错误和 AI 回退状态复核
 - 用户验证指标的采样口径与结果记录
 - 发布前文档与质量证据闭环
 
-完整进度请查看[实施状态](./life-progress-rpg/docs/planning/implementation-status.md)和[路线图](./life-progress-rpg/docs/planning/roadmap.md)。
+完整进度请查看[实施状态](./life-progress-rpg/docs/项目规划/implementation-status.md)和[路线图](./life-progress-rpg/docs/项目规划/roadmap.md)。
 
 ## 参与开发
 

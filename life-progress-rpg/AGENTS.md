@@ -6,12 +6,12 @@
 
 按以下优先级解释需求：
 
-1. `docs/planning/milestone-v1.md`：v0.1 唯一实施基线。
-2. `docs/tech/architecture.md`、`docs/tech/code-structure.md`、`docs/tech/database.md`、`docs/tech/ai-design.md`：架构、目录、技术栈、安全和数据约束。
-3. `docs/design/quality-bar.md`：所有用户可见界面、交互和内容的强制质量门槛。
-4. `docs/design/content-strategy.md`：回应、分析、周期内容和内容指标的产品真源。
-5. `docs/design/ux-spec-v2.md`、`docs/design/component-design.md`：交互与组件规范。
-6. `docs/planning/ai-implementation-loop.md`：AI 持续实施和验收流程。
+1. `docs/项目规划/milestone-v1.md`：v0.1 唯一实施基线。
+2. `docs/技术设计/architecture.md`、`docs/技术设计/code-structure.md`、`docs/技术设计/database.md`、`docs/技术设计/ai-design.md`：架构、目录、技术栈、安全和数据约束。
+3. `docs/产品设计/quality-bar.md`：所有用户可见界面、交互和内容的强制质量门槛。
+4. `docs/产品设计/content-strategy.md`：回应、分析、周期内容和内容指标的产品真源。
+5. `docs/产品设计/ux-spec-v2.md`：交互规范。
+6. `docs/项目规划/ai-implementation-loop.md`：AI 持续实施和验收流程。
 7. 其他标记为愿景、研究、后续或归档的文档。
 
 文档冲突时使用优先级更高的文档。不要把旧方案和当前方案自行拼接。
@@ -65,7 +65,7 @@ v0.1 使用：
 - 组件不包含持久化和供应商调用细节。
 - AI 代理不信任前端传入的用户 ID、模型名、系统提示词或供应商密钥。
 - 不为尚未验证的规模预建微服务。
-- 源码目录、模块职责和依赖方向必须遵守 `docs/tech/code-structure.md`；采用 Feature + Domain + Data + Services + Shared，不按技术类型平铺业务代码。
+- 源码目录、模块职责和依赖方向必须遵守 `docs/技术设计/code-structure.md`；采用 Feature + Domain + Data + Services + Shared，不按技术类型平铺业务代码。
 - Zustand 只保存短生命周期 UI/流程状态，Dexie 是本地持久化真源；TanStack Query 只处理真实服务端请求，不缓存 IndexedDB 的第二份副本。
 
 ## 5. 安全与隐私
@@ -80,7 +80,7 @@ v0.1 使用：
 
 ## 6. AI 输出边界
 
-AI 仅用于整理和反思用户明确提供的内容。内容行为必须符合 `docs/design/content-strategy.md`：数值、门槛、日期范围和证据由确定性代码计算，AI 只组织语言。
+AI 仅用于整理和反思用户明确提供的内容。内容行为必须符合 `docs/产品设计/content-strategy.md`：数值、门槛、日期范围和证据由确定性代码计算，AI 只组织语言。
 
 AI 输出不得：
 
@@ -116,7 +116,7 @@ AI 输出不得：
 
 ## 9. 界面、交互与内容质量
 
-所有用户可见工作必须满足 `docs/design/quality-bar.md`，设计质量不是功能完成后的可选装饰。
+所有用户可见工作必须满足 `docs/产品设计/quality-bar.md`，设计质量不是功能完成后的可选装饰。
 
 - 产品气质保持温暖、克制、清晰、可信、有质感；轻游戏化不能变成喧闹、幼稚或廉价刺激。
 - 每个视口最多一个主要 CTA，标题、关键内容、正文和辅助信息形成清晰层级。
@@ -126,11 +126,11 @@ AI 输出不得：
 - 交互区域至少 44×44px，键盘焦点清晰，正文对比度至少 4.5:1。
 - 动效必须解释状态、尊重 `prefers-reduced-motion`，不能为了炫技延迟操作。
 - 界面文案必须具体、简洁、准确，说明动作结果和错误恢复，禁止鸡汤、羞辱、操控和无依据承诺。
-- 当日回应、周期发现和主动探索必须遵守 `docs/design/content-strategy.md`；当日数据不得包装成趋势，长期结论必须显示样本、日期、不确定性和原始依据。
+- 当日回应、周期发现和主动探索必须遵守 `docs/产品设计/content-strategy.md`；当日数据不得包装成趋势，长期结论必须显示样本、日期、不确定性和原始依据。
 - 用户必须能够评价回应是否有帮助或事实不准确；未同意分析时不得上传反馈正文。
 - 进度展示关闭后不能通过其他组件继续暴露该信息。
 - 至少检查 360×800、390×844、768×1024 和 1440×900；桌面端不能只是拉宽手机版。
-- 能使用浏览器或截图工具时，必须进行关键页面和状态的视觉复核；未进行时明确标记为待人工视觉验收，不得声称“界面美观已通过”。
+- 使用浏览器自动化或截图工具复核关键页面和状态，并保存可复核证据；没有证据时标记为“未验证”，不得声称界面质量通过。项目不要求人工逐项签字。
 
 ## 10. 工作流程
 
@@ -138,7 +138,7 @@ AI 输出不得：
 
 1. 阅读相关权威文档和现有实现。
 2. 运行 `git status --short`。
-3. 创建或移动源码前阅读 `docs/tech/code-structure.md`，确认所属模块和依赖方向。
+3. 创建或移动源码前阅读 `docs/技术设计/code-structure.md`，确认所属模块和依赖方向。
 4. 保留用户已有改动，避免无关修改。
 5. 根据 `package.json` 确认真实存在的验证脚本。
 6. 记录初始测试、类型检查和构建状态。
@@ -158,7 +158,7 @@ AI 输出不得：
 2. 运行 `npm run lint`。
 3. 运行 `npm run test -- --run`。
 4. 运行 `npm run build`。
-5. 按 `docs/design/quality-bar.md` 复核真实内容、状态和响应式视口；可用时保存浏览器截图证据。
+5. 按 `docs/产品设计/quality-bar.md` 复核真实内容、状态和响应式视口；可用时保存浏览器截图证据。
 6. 运行项目 Skill 的 `scripts/validate_project.py`。
 7. 运行 `git diff --check`。
 8. 检查最终差异中没有无关文件。
@@ -169,16 +169,16 @@ AI 输出不得：
 
 以下变化必须同步更新文档：
 
-- 功能范围：`docs/planning/milestone-v1.md`
-- 数据字段或约束：`docs/tech/database.md`
-- 架构或数据流：`docs/tech/architecture.md`
-- 目录、模块职责、状态边界或依赖方向：`docs/tech/code-structure.md`
-- AI 行为或供应商边界：`docs/tech/ai-design.md`
-- 回应、分析、周期内容或内容指标：`docs/design/content-strategy.md`
-- 用户流程或状态：`docs/design/ux-spec-v2.md`
-- 视觉、交互或内容质量门槛：`docs/design/quality-bar.md`
-- 用户可见能力：`docs/guide/faq.md`
-- 实施进度：`docs/planning/implementation-status.md`
+- 功能范围：`docs/项目规划/milestone-v1.md`
+- 数据字段或约束：`docs/技术设计/database.md`
+- 架构或数据流：`docs/技术设计/architecture.md`
+- 目录、模块职责、状态边界或依赖方向：`docs/技术设计/code-structure.md`
+- AI 行为或供应商边界：`docs/技术设计/ai-design.md`
+- 回应、分析、周期内容或内容指标：`docs/产品设计/content-strategy.md`
+- 用户流程或状态：`docs/产品设计/ux-spec-v2.md`
+- 视觉、交互或内容质量门槛：`docs/产品设计/quality-bar.md`
+- 用户可见能力：`docs/使用指南/faq.md`
+- 实施进度：`docs/项目规划/implementation-status.md`
 
 不要在目录中链接尚不存在的文件。历史方案必须明确标记为归档。
 
@@ -192,13 +192,13 @@ AI 输出不得：
 - 默认模式不会发送用户记录。
 - 前端构建产物中不存在供应商 API Key。
 - AI 失败不影响本地保存。
-- 所有用户可见页面满足 `docs/design/quality-bar.md` 的适用项。
-- 已完成真实浏览器/截图复核；无法执行时明确记录待人工视觉验收。
+- 所有用户可见页面满足 `docs/产品设计/quality-bar.md` 的适用项。
+- 已完成浏览器自动化/截图复核并保存证据；无法执行时标记为“未验证”，不得以人工验收作为替代门槛。
 - 文案具体、准确、无操控性，并覆盖成功、空状态、错误和恢复。
 - 文档本地链接和 Markdown 结构检查通过。
 - `git diff --check` 通过。
 - 最终差异不存在无关改动。
-- 新源码符合 `docs/tech/code-structure.md` 的目录和单向依赖约束，没有第二份持久化真源或无法构建的孤立服务端文件。
+- 新源码符合 `docs/技术设计/code-structure.md` 的目录和单向依赖约束，没有第二份持久化真源或无法构建的孤立服务端文件。
 
 如果仍有可安全执行的 P0 工作，按照
-`docs/planning/ai-implementation-loop.md` 继续，不要提前宣布完成。
+`docs/项目规划/ai-implementation-loop.md` 继续，不要提前宣布完成。

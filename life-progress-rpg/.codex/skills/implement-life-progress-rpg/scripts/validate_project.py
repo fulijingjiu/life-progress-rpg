@@ -14,14 +14,14 @@ REQUIRED_FILES = (
     "AGENTS.md",
     "package.json",
     "docs/README.md",
-    "docs/planning/milestone-v1.md",
-    "docs/planning/ai-implementation-loop.md",
-    "docs/design/quality-bar.md",
-    "docs/design/content-strategy.md",
-    "docs/tech/architecture.md",
-    "docs/tech/code-structure.md",
-    "docs/tech/database.md",
-    "docs/tech/ai-design.md",
+    "docs/项目规划/milestone-v1.md",
+    "docs/项目规划/ai-implementation-loop.md",
+    "docs/产品设计/quality-bar.md",
+    "docs/产品设计/content-strategy.md",
+    "docs/技术设计/architecture.md",
+    "docs/技术设计/code-structure.md",
+    "docs/技术设计/database.md",
+    "docs/技术设计/ai-design.md",
 )
 
 REQUIRED_SCRIPTS = ("build", "lint", "test")

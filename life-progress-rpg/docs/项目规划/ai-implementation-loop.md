@@ -8,32 +8,27 @@
 
 你是 life-progress-rpg 的主实现工程师。你的任务不是只提出方案，而是持续实现、测试和修复，直到 v0.1 MVP 的全部 P0 验收项通过。
 
-项目根目录：
-
-```text
-/home/root1/下载/tools/tools/life-progress-rpg
-```
+在同时包含 `package.json` 与 `AGENTS.md` 的项目目录执行本文命令。
 
 ## 一、开始前必须阅读
 
 依次完整阅读：
 
 1. `docs/README.md`
-2. `docs/planning/milestone-v1.md`
-3. `docs/design/concept.md`
-4. `docs/design/ux-spec-v2.md`
-5. `docs/design/component-design.md`
-6. `docs/tech/architecture.md`
-7. `docs/tech/database.md`
-8. `docs/tech/ai-design.md`
-9. `docs/guide/getting-started.md`
-10. `docs/guide/faq.md`
+2. `docs/项目规划/milestone-v1.md`
+3. `docs/产品设计/concept.md`
+4. `docs/产品设计/ux-spec-v2.md`
+5. `docs/技术设计/architecture.md`
+6. `docs/技术设计/database.md`
+7. `docs/技术设计/ai-design.md`
+8. `docs/使用指南/getting-started.md`
+9. `docs/使用指南/faq.md`
 
 文档优先级：
 
-1. `docs/planning/milestone-v1.md`
-2. `docs/tech/architecture.md`、`database.md`、`ai-design.md`
-3. `docs/design/ux-spec-v2.md`、`component-design.md`
+1. `docs/项目规划/milestone-v1.md`
+2. `docs/技术设计/architecture.md`、`database.md`、`ai-design.md`
+3. `docs/产品设计/ux-spec-v2.md`
 4. 其他标记为愿景、研究、后续或归档的文档
 
 如果文档冲突，以优先级更高的文档为准。不得自行拼接互相冲突的旧方案。
@@ -83,7 +78,7 @@
 4. 运行现有测试、类型检查和构建，记录初始失败。
 5. 搜索是否已有数据类型、IndexedDB、状态管理、路由、Onboarding、Record、Settings、History 和 AI 接口。
 6. 优先扩展已有结构，避免创建重复模块。
-7. 创建或更新 `docs/planning/implementation-status.md`。
+7. 创建或更新 `docs/项目规划/implementation-status.md`。
 
 `implementation-status.md` 至少记录：
 
@@ -99,7 +94,7 @@
 
 ### 阶段 A：工程骨架、基础模型和存储
 
-先阅读[代码结构与技术栈边界](../tech/code-structure.md)，只创建当前切片需要的 `app`、`domain`、`data`、`features`、`services`、`shared` 和 `test` 目录。不一次性生成空目录，不创建没有构建入口的 `server/`。
+先阅读[代码结构与技术栈边界](../技术设计/code-structure.md)，只创建当前切片需要的 `app`、`domain`、`data`、`features`、`services`、`shared` 和 `test` 目录。不一次性生成空目录，不创建没有构建入口的 `server/`。
 
 实现：
 
@@ -189,7 +184,7 @@
 
 ### 阶段 E：当日回应系统
 
-先按[内容策略](../design/content-strategy.md)实现确定性的本地回应：
+先按[内容策略](../产品设计/content-strategy.md)实现确定性的本地回应：
 
 - 优先回应备注中的明确事件，其次是标签或当日状态。
 - 只有一条记录时不使用“趋势、经常、总是、通常”。
@@ -257,7 +252,7 @@ AI 代理要求：
 
 ### 阶段 H：视觉、交互与内容精修
 
-以 `docs/design/quality-bar.md` 为强制验收表，逐页完成：
+以 `docs/产品设计/quality-bar.md` 为强制验收表，逐页完成：
 
 - 明确唯一主任务和信息层级
 - 统一间距、排版、色彩、图标、圆角和阴影
@@ -269,13 +264,13 @@ AI 代理要求：
 - 逐条精简按钮、说明、成功、错误和空状态文案
 - 可用时保存关键页面与状态截图并复核
 
-无法运行浏览器或截图时，把“人工视觉验收”明确记录为未完成，不得仅凭代码宣称界面美观通过。
+无法运行浏览器或截图时，把对应项目标记为“未验证”，不得仅凭代码宣称界面质量通过；不设置人工逐项签字门槛。
 
 ## 五、Loop 工程计划清单（本轮执行版）
 
 ### 本轮目标（建议 3–4 小时）
 
-- 完成人工验收闭环：把 `docs/planning/quality-audit-h.md` 的每一页关键状态逐项核验并给出结论。
+- 完成自动化验收闭环：为 `docs/验收证据/quality-audit-h.md` 中的关键状态生成可复核证据并给出 PASS/FAIL/未验证结论。
 - 补齐缺失的发布前证据：每项功能至少提供一条可复核证据（命令输出、截图路径、或已知阻塞说明）。
 - 将外部依赖风险降到可控范围：优先确保“无外部 AI 也可稳定使用”，把供应商联调列为下一轮外部待办。
 
@@ -288,13 +283,13 @@ AI 代理要求：
 
 2. **阶段 H 视觉/交互/内容验收**
    - 输入：`quality-audit-h.md` 中未完成的核验项
-   - 产出：对每页/每状态（首页、记录、历史、设置、数据管理、引导）逐项打“通过/不通过/待修订”
-   - 证据：`artifacts/quality-audit/` 截图路径 + 表内勾选
+   - 产出：对核心页面和状态（首页、记录、历史、设置、数据管理、引导）记录“PASS/FAIL/未验证”
+   - 证据：浏览器自动化结果、`docs/验收证据/界面截图/` 截图路径、可访问性或性能报告
 
 3. **AI 与本地回退闭环**
    - 输入：`reflect-service`/记录保存链路、AI 同意开关
    - 产出：补齐“AI 未同意、生成中、失败回退”的文字与状态说明
-   - 证据：相关场景手动复现说明（或测试结论）
+   - 证据：相关场景的浏览器自动化结果、测试结论或可复核截图
 
 4. **质量门禁**
    - 输入：`package.json` 脚本和实际运行结果
@@ -455,8 +450,8 @@ AI 代理要求：
 - 前端构建产物中不存在供应商 API Key。
 - 默认模式不会发送用户记录。
 - AI 失败不影响本地保存。
-- 所有用户可见页面满足 `docs/design/quality-bar.md` 的适用项。
-- 已检查规定视口和关键状态，并保存截图证据；无法执行时明确标记待人工视觉验收。
+- 所有用户可见页面满足 `docs/产品设计/quality-bar.md` 的适用项。
+- 已通过自动化检查规定视口和关键状态，并保存截图证据；无法执行时明确标记为“未验证”。
 - 界面文案具体、准确、友好，成功、空状态、错误和恢复内容完整。
 - 没有新增失效文档链接。
 - `git diff --check` 通过。
@@ -477,7 +472,7 @@ AI 代理要求：
 6. 不阻止 v0.1 的已知技术债务。
 7. MVP 验收表逐项 PASS/FAIL 和对应证据。
 8. 视觉、交互、响应式、无障碍和内容质量的复核证据。
-9. 尚待人工视觉验收的页面或状态。
+9. 自动化验收中 FAIL 或未验证的页面与状态。
 10. `git status --short` 和最终差异摘要。
 
 [返回规划目录](./README.md) | [返回文档中心](../README.md)

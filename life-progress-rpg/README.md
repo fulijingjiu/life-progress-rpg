@@ -3,7 +3,7 @@
 一个本地优先的个人记录 MVP：用可关闭的估算进度吸引第一次注意，让低负担记录立即得到具体回应，并把累积记录逐渐变成可核对的个人线索。
 
 > 当前版本：v0.1 实施阶段
-> 唯一实施基线：[MVP 规划](./docs/planning/milestone-v1.md)
+> 唯一实施基线：[MVP 规划](./docs/项目规划/milestone-v1.md)
 
 ## v0.1 范围
 
@@ -64,23 +64,23 @@ $implement-life-progress-rpg
 使用 $implement-life-progress-rpg 按项目规则实现并验证 v0.1 的下一个 P0 垂直切片。
 ```
 
-完整自主执行流程见 [AI 实现执行 Loop](./docs/planning/ai-implementation-loop.md)。
+完整自主执行流程见 [AI 实现执行 Loop](./docs/项目规划/ai-implementation-loop.md)。
 
 ## 文档
 
 - [文档中心](./docs/README.md)
-- [项目概念](./docs/design/concept.md)
-- [MVP 规划](./docs/planning/milestone-v1.md)
-- [AI 实现执行 Loop](./docs/planning/ai-implementation-loop.md)
-- [UX 规范](./docs/design/ux-spec-v2.md)
-- [界面、交互与内容质量基线](./docs/design/quality-bar.md)
-- [内容价值与个人分析策略](./docs/design/content-strategy.md)
-- [系统架构](./docs/tech/architecture.md)
-- [代码结构与技术栈边界](./docs/tech/code-structure.md)
-- [数据设计](./docs/tech/database.md)
-- [AI 接入与安全](./docs/tech/ai-design.md)
-- [开发快速开始](./docs/guide/getting-started.md)
-- [常见问题](./docs/guide/faq.md)
+- [项目概念](./docs/产品设计/concept.md)
+- [MVP 规划](./docs/项目规划/milestone-v1.md)
+- [AI 实现执行 Loop](./docs/项目规划/ai-implementation-loop.md)
+- [UX 规范](./docs/产品设计/ux-spec-v2.md)
+- [界面、交互与内容质量基线](./docs/产品设计/quality-bar.md)
+- [内容价值与个人分析策略](./docs/产品设计/content-strategy.md)
+- [系统架构](./docs/技术设计/architecture.md)
+- [代码结构与技术栈边界](./docs/技术设计/code-structure.md)
+- [数据设计](./docs/技术设计/database.md)
+- [AI 接入与安全](./docs/技术设计/ai-design.md)
+- [开发快速开始](./docs/使用指南/getting-started.md)
+- [常见问题](./docs/使用指南/faq.md)
 
 ## 项目规则
 

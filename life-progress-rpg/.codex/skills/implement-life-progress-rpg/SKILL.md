@@ -9,14 +9,14 @@ description: Implement, fix, review, polish, test, or continue the life-progress
 
 1. Resolve the repository root with `git rev-parse --show-toplevel`; if unavailable, locate the nearest directory containing `package.json`, `AGENTS.md`, and `docs/`.
 2. Read `AGENTS.md` completely before acting.
-3. Read `docs/README.md` and `docs/planning/milestone-v1.md`.
+3. Read `docs/README.md` and `docs/项目规划/milestone-v1.md`.
 4. Read only the task-relevant specifications:
-   - UI, interaction, content, or polish: read `docs/design/quality-bar.md` and `docs/design/content-strategy.md`, then the relevant parts of `ux-spec-v2.md`, `component-design.md`, `visual-design.md`, `motion-design.md`, and `copywriting.md`
-   - coding, file creation, module boundaries, state, or dependencies: `docs/tech/code-structure.md`
-   - data or persistence: `docs/tech/database.md`
-   - architecture or integration: `docs/tech/architecture.md`
-   - AI or reflection: `docs/tech/ai-design.md`
-   - autonomous continuation: `docs/planning/ai-implementation-loop.md`
+   - UI, interaction, content, or polish: read `docs/产品设计/quality-bar.md` and `docs/产品设计/content-strategy.md`, then the relevant parts of `docs/产品设计/ux-spec-v2.md`
+   - coding, file creation, module boundaries, state, or dependencies: `docs/技术设计/code-structure.md`
+   - data or persistence: `docs/技术设计/database.md`
+   - architecture or integration: `docs/技术设计/architecture.md`
+   - AI or reflection: `docs/技术设计/ai-design.md`
+   - autonomous continuation: `docs/项目规划/ai-implementation-loop.md`
 5. Treat the MVP plan as the implementation source of truth. Treat documents marked vision, research, future, or archived as non-authoritative.
 
 ## Inspect before editing
@@ -25,7 +25,7 @@ description: Implement, fix, review, polish, test, or continue the life-progress
 - Read `package.json` to discover real scripts and dependencies.
 - Search the existing code before adding modules or dependencies.
 - Run the smallest relevant baseline check. Record pre-existing failures separately.
-- Read `docs/planning/implementation-status.md` when it exists.
+- Read `docs/项目规划/implementation-status.md` when it exists.
 
 Do not assume the documented target is already implemented. Confirm behavior from code and tests.
 
@@ -38,7 +38,7 @@ Choose the narrowest applicable workflow:
 - **Review:** report findings first; do not mutate unless the user asked for changes.
 - **Design/content polish:** inspect the real rendered page, all applicable states, responsive layouts, and Chinese copy; fix quality issues instead of only commenting on them when changes are requested.
 - **Validate/release:** run the project checks, perform the design-quality review, and map evidence to the MVP acceptance table.
-- **Product/content strategy:** use `docs/design/content-strategy.md` to separate acquisition, activation, retention, and trust; convert content ideas into evidence rules, version gates, user controls, and measurable hypotheses.
+- **Product/content strategy:** use `docs/产品设计/content-strategy.md` to separate acquisition, activation, retention, and trust; convert content ideas into evidence rules, version gates, user controls, and measurable hypotheses.
 - **Documentation:** update the authoritative document and every directly affected contract, without changing implementation unless asked.
 
 ## Enforce the scope gate
@@ -61,7 +61,7 @@ Preserve these invariants:
 
 ## Enforce the code structure
 
-Follow `docs/tech/code-structure.md` whenever creating or moving source files.
+Follow `docs/技术设计/code-structure.md` whenever creating or moving source files.
 
 - Organize user capabilities under `features`, pure rules under `domain`, Dexie and import/export under `data`, external clients under `services`, and only truly generic code under `shared`.
 - Keep `domain` free of React, Router, Zustand, Dexie, and service imports.
@@ -76,21 +76,21 @@ Follow `docs/tech/code-structure.md` whenever creating or moving source files.
 For each slice:
 
 1. State the acceptance item being completed.
-2. Trace the path from UI through Feature, Domain, Data/Service, and persistence; place each responsibility according to `docs/tech/code-structure.md`.
+2. Trace the path from UI through Feature, Domain, Data/Service, and persistence; place each responsibility according to `docs/技术设计/code-structure.md`.
 3. Define or reuse typed contracts at boundaries.
 4. Add runtime validation for external, imported, persisted, or AI-generated data.
 5. Implement loading, success, empty, error, offline, AI-consent/fallback, and recovery behavior where applicable.
 6. Use realistic short, long, empty, and error-state Chinese content; verify hierarchy and wrapping rather than relying on placeholders.
-7. Complete the applicable `docs/design/quality-bar.md` checks in the same slice; do not defer all visual and content quality to a final cleanup.
+7. Complete the applicable `docs/产品设计/quality-bar.md` checks in the same slice; do not defer all visual and content quality to a final cleanup.
 8. Add focused unit/integration tests and an end-to-end test for a core user path when infrastructure exists.
 9. Avoid placeholders, static success responses, disabled validation, deleted tests, broad `any`, or unrelated refactors.
-10. Update `docs/planning/implementation-status.md` with evidence and the next slice.
+10. Update `docs/项目规划/implementation-status.md` with evidence and the next slice.
 
 Keep IndexedDB access in the data layer. Keep date/progress/reflection calculations pure. Keep provider calls behind a same-origin server proxy.
 
 ## Raise interface and content quality
 
-Use `docs/design/quality-bar.md` as a mandatory acceptance contract and `docs/design/content-strategy.md` as the content-product contract.
+Use `docs/产品设计/quality-bar.md` as a mandatory acceptance contract and `docs/产品设计/content-strategy.md` as the content-product contract.
 
 For every user-visible slice:
 
@@ -121,7 +121,7 @@ Prefer calm, warm, restrained, content-led presentation. Make polish support com
 ## Run the implementation loop
 
 When asked to continue, finish, or work autonomously, follow
-`docs/planning/ai-implementation-loop.md`.
+`docs/项目规划/ai-implementation-loop.md`.
 
 Each loop must produce at least one of:
 
