@@ -1,6 +1,6 @@
 # 数据设计
 
-> 状态：v0.1 本地数据为实施基线；云端结构是后续参考
+> 状态：v0.1 本地数据为实施基线；云端数据库已立项，正式实施结构以[云端数据库与 AI 架构](./云端数据库与AI架构.md)为准
 
 ## v0.1：IndexedDB
 
@@ -58,52 +58,17 @@ db.version(1).stores({
 - 导入数据先做版本、类型、范围和数量校验，再使用单事务写入。
 - 每次 schema 升级提供迁移函数和回滚/备份说明。
 
-## 后续云端参考
+## 后续云端参考（历史草案）
 
-只有跨设备需求通过验证并完成隐私评审后才启用。
+云端能力已立项，但仍须在 v0.1 可发布并完成隐私、安全评审后启用。以下 SQL 保留为查询示例的上下文，不再作为建库脚本；正式表、Auth 外键、RLS、同步版本和 AI 元数据见[云端数据库与 AI 架构](./云端数据库与AI架构.md)。
 
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY,
-  nickname VARCHAR(50),
-  birthday_year SMALLINT NOT NULL
-    CHECK (birthday_year BETWEEN 1900 AND EXTRACT(YEAR FROM CURRENT_DATE)),
-  life_expectancy SMALLINT NOT NULL DEFAULT 80
-    CHECK (life_expectancy BETWEEN 1 AND 120),
-  show_life_progress BOOLEAN NOT NULL DEFAULT TRUE,
-  ai_consent BOOLEAN NOT NULL DEFAULT FALSE,
-  analytics_consent BOOLEAN NOT NULL DEFAULT FALSE,
-  theme VARCHAR(20) NOT NULL DEFAULT 'default',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+建库脚本不在本文重复维护，避免需求变化后出现两套真相。正式设计包含：
 
-CREATE TABLE life_records (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  local_date DATE NOT NULL,
-  mood SMALLINT NOT NULL CHECK (mood BETWEEN 1 AND 5),
-  energy SMALLINT NOT NULL CHECK (energy BETWEEN 0 AND 10),
-  content TEXT CHECK (char_length(content) <= 5000),
-  tags JSONB NOT NULL DEFAULT '[]'::jsonb
-    CHECK (jsonb_typeof(tags) = 'array'),
-  reflection TEXT,
-  reflection_source VARCHAR(10) NOT NULL DEFAULT 'none'
-    CHECK (reflection_source IN ('rules', 'ai', 'none')),
-  reflection_status VARCHAR(20) NOT NULL DEFAULT 'not_requested'
-    CHECK (reflection_status IN ('not_requested', 'pending', 'completed', 'failed')),
-  reflection_feedback VARCHAR(20)
-    CHECK (reflection_feedback IN ('helpful', 'not_helpful', 'inaccurate')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (user_id, local_date)
-);
-
-CREATE INDEX idx_records_user_date
-  ON life_records(user_id, local_date DESC);
-CREATE INDEX idx_records_tags
-  ON life_records USING GIN(tags);
-```
+- `auth.users` 托管身份；
+- `user_settings` 与 `life_records` 业务表；
+- 记录版本、删除墓碑和同步游标；
+- 所有业务表的 RLS 所有者策略；
+- 不保存正文的 `ai_requests` 元数据表。
 
 ## 正确查询示例
 
