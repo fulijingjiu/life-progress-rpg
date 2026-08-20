@@ -16,6 +16,8 @@ REQUIRED_FILES = (
     "docs/README.md",
     "docs/项目规划/milestone-v1.md",
     "docs/项目规划/ai-implementation-loop.md",
+    "docs/功能清单/功能点.md",
+    "docs/功能清单/功能测试.md",
     "docs/产品设计/quality-bar.md",
     "docs/产品设计/content-strategy.md",
     "docs/技术设计/architecture.md",
