@@ -49,15 +49,15 @@
 | 检查项 | 状态 | 证据或缺口 |
 | --- | --- | --- |
 | ESLint | PASS | `npm run lint` |
-| 单元测试 | PASS | `npm run test -- --run`，当前 15 项测试 |
+| 单元测试 | PASS | `npm run test -- --run`，当前 21 项测试 |
 | 生产构建 | PASS | `npm run build` |
 | 项目文档与安全自检 | PASS | `validate_project.py` |
 | 关键视口截图生成 | PASS | `docs/验收证据/界面截图/`，现有 24 张截图 |
-| 核心浏览器场景自动化 | 未验证 | 尚无完整的端到端运行报告 |
+| 核心浏览器场景自动化 | PASS | `npm run test:e2e`，5 条 Playwright 核心流程通过 |
 | 键盘与可访问性自动检查 | 未验证 | 尚无扫描或自动化流程报告 |
 | LCP/INP 性能门槛 | 未验证 | 尚无 Lighthouse 或等价报告 |
-| 离线启动与恢复 | 未验证 | 尚无 Service Worker/PWA 场景证据 |
-| AI 未同意和失败回退 | 未验证 | 有代码路径，尚缺端到端证据 |
+| 加载后离线保存与恢复 | PASS | Playwright 断网保存、恢复联网和刷新回填通过；离线冷启动不属于 v0.1 |
+| AI 未同意和失败回退 | PASS | Playwright 覆盖默认本地模式和 AI 请求失败回退 |
 
 ## 已有截图证据
 

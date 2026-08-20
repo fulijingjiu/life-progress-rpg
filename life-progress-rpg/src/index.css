@@ -8,6 +8,52 @@
   --primary-soft: #eff4ff;
   --danger: #ca3a3a;
   --radius: 12px;
+  --bg-start: #f7fbff;
+  --bg-end: #e9f0ff;
+}
+
+:root[data-theme='spring'] {
+  --bg: #f2f8f1;
+  --text: #19372a;
+  --muted: #597364;
+  --line: #cfe0d2;
+  --primary: #387a54;
+  --primary-soft: #e8f4eb;
+  --bg-start: #f8fcf6;
+  --bg-end: #e4f1e6;
+}
+
+:root[data-theme='study'] {
+  --bg: #f6f3fa;
+  --text: #2f2440;
+  --muted: #6d617c;
+  --line: #ddd3e8;
+  --primary: #72549b;
+  --primary-soft: #f0eafb;
+  --bg-start: #fbf9fd;
+  --bg-end: #eee7f6;
+}
+
+:root[data-theme='explore'] {
+  --bg: #fbf5ed;
+  --text: #412a19;
+  --muted: #796552;
+  --line: #ead7c1;
+  --primary: #b66328;
+  --primary-soft: #fbeadb;
+  --bg-start: #fffaf4;
+  --bg-end: #f6e7d6;
+}
+
+:root[data-theme='root'] {
+  --bg: #f5f1ed;
+  --text: #352b25;
+  --muted: #72645b;
+  --line: #dfd3ca;
+  --primary: #72513f;
+  --primary-soft: #eee4dd;
+  --bg-start: #faf7f4;
+  --bg-end: #ece3dc;
 }
 
 * {
@@ -17,7 +63,7 @@
 body {
   margin: 0;
   font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
-  background: radial-gradient(140% 120% at 0% 0%, #f7fbff 0%, var(--bg) 40%, #e9f0ff 100%);
+  background: radial-gradient(140% 120% at 0% 0%, var(--bg-start) 0%, var(--bg) 40%, var(--bg-end) 100%);
   color: var(--text);
 }
 

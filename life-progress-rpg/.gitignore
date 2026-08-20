@@ -27,6 +27,8 @@ npm-debug.log*
 
 # Testing
 coverage/
+playwright-report/
+test-results/
 
 # PWA
 dev-dist/

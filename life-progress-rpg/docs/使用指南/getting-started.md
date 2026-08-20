@@ -68,7 +68,8 @@ AI_PROVIDER_MODEL=<server-configured-model>
 ```bash
 npm run build
 npm run lint
-npm run test
+npm run test -- --run
+npm run test:e2e
 ```
 
 若脚本不存在，应先在项目中添加对应配置，而不是在文档中假定它存在。

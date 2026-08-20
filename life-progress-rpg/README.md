@@ -31,7 +31,7 @@ v0.1 不包含账号、云同步、公开分享、排行榜、正式成就/XP、
 
 ## 开发
 
-要求 Node.js 18 或更高版本。
+要求 Node.js 20 或更高版本。
 
 ```bash
 npm install
@@ -43,6 +43,7 @@ npm run dev
 ```bash
 npm run lint
 npm run test -- --run
+npm run test:e2e
 npm run build
 python .codex/skills/implement-life-progress-rpg/scripts/validate_project.py
 git diff --check

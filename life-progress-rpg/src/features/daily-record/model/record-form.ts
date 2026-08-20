@@ -50,7 +50,7 @@ export const buildRecordFormFromRecord = (record: LifeRecord): RecordFormInput =
 
 export const initialRecordForm: RecordFormInput = {
   mood: '',
-  energy: '',
+  energy: 5,
   content: '',
   tagsText: '',
   reflection: '',

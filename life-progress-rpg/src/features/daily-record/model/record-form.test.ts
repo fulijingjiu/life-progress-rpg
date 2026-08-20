@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { buildFormPayloadForDate, buildRecordFormFromRecord, initialRecordForm } from './record-form';
 
 describe('record form model', () => {
+  it('starts energy at the visible slider default', () => {
+    expect(initialRecordForm.energy).toBe(5);
+  });
+
   it('uses explicit local date in payload', () => {
     const payload = buildFormPayloadForDate(
       {

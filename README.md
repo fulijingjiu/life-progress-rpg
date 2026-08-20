@@ -97,7 +97,7 @@ React + TypeScript
 
 ### 环境要求
 
-- Node.js 18 或更高版本
+- Node.js 20 或更高版本
 - npm
 
 ### 本地运行

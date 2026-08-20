@@ -22,6 +22,7 @@ type SettingsForm = {
   showLifeProgress: boolean;
   aiConsent: boolean;
   analyticsConsent: boolean;
+  theme: UserSettings['theme'];
 };
 
 type SettingsError = {
@@ -46,6 +47,7 @@ export function SettingsPage() {
     showLifeProgress: true,
     aiConsent: false,
     analyticsConsent: false,
+    theme: 'default',
   });
 
   const [sourceDate, setSourceDate] = useState('');
@@ -66,6 +68,7 @@ export function SettingsPage() {
           showLifeProgress: settings.showLifeProgress,
           aiConsent: settings.aiConsent,
           analyticsConsent: settings.analyticsConsent,
+          theme: settings.theme,
         });
         setSourceDate(toSafeLocalDate(settings.updatedAt));
       })
@@ -124,6 +127,7 @@ export function SettingsPage() {
       showLifeProgress: formState.showLifeProgress,
       aiConsent: formState.aiConsent,
       analyticsConsent: formState.analyticsConsent,
+      theme: formState.theme,
     };
 
     const validation = validateSettingsPatch(patch);
@@ -137,6 +141,7 @@ export function SettingsPage() {
 
     try {
       await settingsRepository.updateById(DEFAULT_USER_ID, validation.value);
+      document.documentElement.dataset.theme = validation.value.theme ?? 'default';
       setMessage('设置已保存。后续更改会保存在此设备。');
       setSourceDate(toLocalDate(new Date()));
     } catch (error) {
@@ -186,6 +191,26 @@ export function SettingsPage() {
                   显示估算人生进度
                 </label>
                 <small className="field-note">关闭后首页将不再展示进度估算模块。</small>
+              </label>
+
+              <label className="field">
+                主题
+                <select
+                  value={formState.theme}
+                  onChange={(event) =>
+                    setFormState((current) => ({
+                      ...current,
+                      theme: event.target.value as UserSettings['theme'],
+                    }))
+                  }
+                >
+                  <option value="default">默认蓝</option>
+                  <option value="spring">春日绿</option>
+                  <option value="study">专注紫</option>
+                  <option value="explore">探索橙</option>
+                  <option value="root">沉静棕</option>
+                </select>
+                <small className="field-note">只改变当前设备上的界面颜色。</small>
               </label>
             </section>
 

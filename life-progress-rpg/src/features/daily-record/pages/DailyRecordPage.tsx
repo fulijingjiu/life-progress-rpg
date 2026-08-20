@@ -19,7 +19,7 @@ export function DailyRecordPage() {
 
   const urlDate = params.localDate;
   const resolvedDate = urlDate && isValidLocalDate(urlDate) ? urlDate : toLocalDate();
-  const isToday = resolvedDate === toLocalDate();
+  const isHistoryEdit = Boolean(urlDate);
 
   useEffect(() => {
     if (urlDate && !isValidLocalDate(urlDate)) {
@@ -56,11 +56,11 @@ export function DailyRecordPage() {
     <MainLayout>
       <section>
         <SectionTitle
-          title={isToday ? '今天记录' : '历史记录编辑'}
+          title={isHistoryEdit ? '历史记录编辑' : '今天记录'}
           description={
-            isToday
-              ? '3 步完成：心情、活力、标签与备注（可选）。'
-              : '可修改当前日期的记录内容，再次保存不会创建重复记录。'
+            isHistoryEdit
+              ? '可修改当前日期的记录内容，再次保存不会创建重复记录。'
+              : '3 步完成：心情、活力、标签与备注（可选）。'
           }
         />
         <RecordSheet localDate={resolvedDate} initialRecord={record} />
@@ -73,8 +73,8 @@ export function DailyRecordPage() {
         ) : null}
 
         <div className="home-actions">
-          <Link className="btn btn--ghost" to={isToday ? '/' : '/history'}>
-            {isToday ? '返回首页' : '返回历史列表'}
+          <Link className="btn btn--ghost" to={isHistoryEdit ? '/history' : '/'}>
+            {isHistoryEdit ? '返回历史列表' : '返回首页'}
           </Link>
         </div>
       </section>
