@@ -5,6 +5,8 @@ description: Implement, fix, review, polish, test, or continue the life-progress
 
 # Implement Life Progress RPG
 
+> 更新时间：2026-09-27（状态与依赖描述、证据记录方式与 AGENTS.md、docs 同步）
+
 ## Establish context
 
 1. Resolve the repository root with `git rev-parse --show-toplevel`; if unavailable, locate the nearest directory containing `package.json`, `AGENTS.md`, and `docs/`.
@@ -37,7 +39,7 @@ Choose the narrowest applicable workflow:
 - **Review:** report findings first; do not mutate unless the user asked for changes.
 - **Design/content polish:** inspect the real rendered page, all applicable states, responsive layouts, and Chinese copy; fix quality issues instead of only commenting on them when changes are requested.
 - **Validate/release:** run the project checks, perform the design-quality review, and map evidence to the MVP acceptance table.
-- **Product/content strategy:** use `docs/产品设计/内容策略.md` to separate acquisition, activation, retention, and trust; convert content ideas into evidence rules, version gates, user controls, and measurable hypotheses.
+- **Product/content strategy:** use `docs/产品设计/内容策略.md` to separate acquisition, activation, retention, and trust; convert content ideas into evidence rules, version gates, and user controls.
 - **Documentation:** update the authoritative document and every directly affected contract, without changing implementation unless asked.
 
 ## Enforce the scope gate
@@ -63,9 +65,9 @@ Preserve these invariants:
 Follow `docs/技术设计/代码结构.md` whenever creating or moving source files.
 
 - Organize user capabilities under `features`, pure rules under `domain`, Dexie and import/export under `data`, external clients under `services`, and only truly generic code under `shared`.
-- Keep `domain` free of React, Router, Zustand, Dexie, and service imports.
-- Keep Dexie as the persisted-data source of truth. Do not mirror record collections in Zustand or QueryClient.
-- Use Zustand only for short-lived UI/process state and TanStack Query only for real server state.
+- Keep `domain` free of React, Router, Dexie, and service imports.
+- Keep Dexie (IndexedDB) as the only persisted source of truth. Do not mirror record collections into any second store or cache layer.
+- Keep short-lived UI/process state inside components and feature models. The project has no global state library and no server-state cache; adding one requires updating `docs/技术设计/代码结构.md` first and must be justified by a current acceptance item.
 - Expose each feature through a small public entry; do not deep-import another feature's internals.
 - Create only directories needed by the current slice. Avoid empty architecture scaffolding.
 - Do not add `server/` files until their runtime, build, environment validation, and deployment path are real.
@@ -148,9 +150,9 @@ Start with targeted tests during iteration, then run the full available set befo
 
 For documentation-only changes, at minimum run the project validator and `git diff --check`.
 
-For source changes, also review module imports, Zustand/Dexie/Query ownership, and whether every server file is included in a real build path.
+For source changes, also review module imports, the single persisted source of truth (Dexie) versus feature-local state, and whether every server file is included in a real build path.
 
-For user-visible changes, additionally inspect rendered states and responsive viewports. Capture screenshot or browser evidence when tooling exists. If it does not, explicitly separate automated PASS results from pending visual/human judgment.
+For user-visible changes, additionally inspect rendered states and responsive viewports in a browser when tooling exists, and record the outcome in the 工程门禁状态 section of `docs/项目规划/实施状态.md`. The repository no longer stores screenshot files. When rendering cannot be inspected, explicitly separate automated PASS results from pending visual judgment.
 
 ## Finish with evidence
 
